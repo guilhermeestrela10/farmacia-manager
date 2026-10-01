@@ -36,17 +36,11 @@ public class MedicamentoService {
         String codigoBarras = normalizar(request.codigoBarras());
 
         if (codigoBarras != null && medicamentoRepository.existsByCodigoBarras(codigoBarras)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Já existe um medicamento com esse código de barras.");
+            throw codigoBarrasDuplicado();
         }
 
-        Categoria categoria = categoriaRepository.findById(request.categoriaId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_ENTITY, "Categoria não encontrada."));
-
-        Fabricante fabricante = fabricanteRepository.findById(request.fabricanteId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_ENTITY, "Fabricante não encontrado."));
+        Categoria categoria = buscarCategoria(request.categoriaId());
+        Fabricante fabricante = buscarFabricante(request.fabricanteId());
 
         Medicamento medicamento = new Medicamento(
                 request.nome().trim(),
@@ -59,22 +53,90 @@ public class MedicamentoService {
         return toResponse(medicamentoRepository.save(medicamento));
     }
 
+    @Transactional
+    public MedicamentoResponse atualizar(Long id, MedicamentoRequest request) {
+        Medicamento medicamento = buscarEntidade(id);
+        String codigoBarras = normalizar(request.codigoBarras());
+
+        if (codigoBarras != null
+                && medicamentoRepository.existsByCodigoBarrasAndIdNot(codigoBarras, id)) {
+            throw codigoBarrasDuplicado();
+        }
+
+        Categoria categoria = buscarCategoria(request.categoriaId());
+        Fabricante fabricante = buscarFabricante(request.fabricanteId());
+
+        medicamento.atualizar(
+                request.nome().trim(),
+                codigoBarras,
+                categoria,
+                fabricante,
+                request.preco(),
+                request.estoqueMinimo());
+
+        return toResponse(medicamento);
+    }
+
+    @Transactional
+    public MedicamentoResponse desativar(Long id) {
+        Medicamento medicamento = buscarEntidade(id);
+        medicamento.desativar();
+        return toResponse(medicamento);
+    }
+
+    @Transactional
+    public MedicamentoResponse ativar(Long id) {
+        Medicamento medicamento = buscarEntidade(id);
+        medicamento.ativar();
+        return toResponse(medicamento);
+    }
+
     @Transactional(readOnly = true)
-    public List<MedicamentoResponse> listar(String nome) {
-        List<Medicamento> medicamentos = (nome == null || nome.isBlank())
-                ? medicamentoRepository.findAllByOrderByNome()
-                : medicamentoRepository.findByNomeContainingIgnoreCaseOrderByNome(nome.trim());
+    public List<MedicamentoResponse> listar(String nome, boolean incluirInativos) {
+        boolean semFiltroDeNome = nome == null || nome.isBlank();
+        List<Medicamento> medicamentos;
+
+        if (semFiltroDeNome) {
+            medicamentos = incluirInativos
+                    ? medicamentoRepository.findAllByOrderByNome()
+                    : medicamentoRepository.findByAtivoTrueOrderByNome();
+        } else {
+            String termo = nome.trim();
+            medicamentos = incluirInativos
+                    ? medicamentoRepository.findByNomeContainingIgnoreCaseOrderByNome(termo)
+                    : medicamentoRepository
+                            .findByAtivoTrueAndNomeContainingIgnoreCaseOrderByNome(termo);
+        }
 
         return medicamentos.stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public MedicamentoResponse buscarPorId(Long id) {
-        Medicamento medicamento = medicamentoRepository.findById(id)
+        return toResponse(buscarEntidade(id));
+    }
+
+    private Medicamento buscarEntidade(Long id) {
+        return medicamentoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Medicamento não encontrado."));
+    }
 
-        return toResponse(medicamento);
+    private Categoria buscarCategoria(Long id) {
+        return categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY, "Categoria não encontrada."));
+    }
+
+    private Fabricante buscarFabricante(Long id) {
+        return fabricanteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY, "Fabricante não encontrado."));
+    }
+
+    private ResponseStatusException codigoBarrasDuplicado() {
+        return new ResponseStatusException(
+                HttpStatus.CONFLICT, "Já existe um medicamento com esse código de barras.");
     }
 
     private String normalizar(String codigoBarras) {

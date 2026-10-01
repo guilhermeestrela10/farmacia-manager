@@ -94,4 +94,25 @@ public class Medicamento {
     public boolean isAtivo() {
         return ativo;
     }
+        public Instant getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void atualizar(String nome, String codigoBarras, Categoria categoria,
+                          Fabricante fabricante, BigDecimal preco, int estoqueMinimo) {
+        this.nome = nome;
+        this.codigoBarras = codigoBarras;
+        this.categoria = categoria;
+        this.fabricante = fabricante;
+        this.preco = preco;
+        this.estoqueMinimo = estoqueMinimo;
+    }
+
+    public void desativar() {
+        this.ativo = false;
+    }
+
+    public void ativar() {
+        this.ativo = true;
+    }
 }

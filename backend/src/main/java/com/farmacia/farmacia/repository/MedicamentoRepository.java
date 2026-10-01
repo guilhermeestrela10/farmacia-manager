@@ -10,7 +10,13 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
 
     boolean existsByCodigoBarras(String codigoBarras);
 
-    List<Medicamento> findByNomeContainingIgnoreCaseOrderByNome(String nome);
+    boolean existsByCodigoBarrasAndIdNot(String codigoBarras, Long id);
 
     List<Medicamento> findAllByOrderByNome();
+
+    List<Medicamento> findByAtivoTrueOrderByNome();
+
+    List<Medicamento> findByNomeContainingIgnoreCaseOrderByNome(String nome);
+
+    List<Medicamento> findByAtivoTrueAndNomeContainingIgnoreCaseOrderByNome(String nome);
 }
