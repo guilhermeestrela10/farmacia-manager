@@ -1,63 +1,64 @@
 # 💊 Farmácia Manager
 
-> Sistema de gerenciamento de farmácia desenvolvido com foco em organização, controle de estoque, atendimento farmacêutico, gerenciamento de receitas e dispensação de medicamentos.
+### Sistema de gestão para farmácias
 
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)]()
-[![Java](https://img.shields.io/badge/Java-Backend-orange)]()
-[![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-Backend-brightgreen)]()
-[![MySQL](https://img.shields.io/badge/MySQL-Database-blue)]()
-[![Git](https://img.shields.io/badge/Git-Version%20Control-orange)]()
-[![License](https://img.shields.io/badge/license-TBD-lightgrey)]()
+> Um projeto em desenvolvimento para tornar a rotina da farmácia mais organizada, prática e fácil de acompanhar.
 
 ---
 
-## 📋 Sobre o projeto
+## 📌 Sobre o projeto
 
-O **Farmácia Manager** é um projeto de software desenvolvido com o objetivo de criar uma plataforma completa para gerenciamento de operações de uma farmácia.
+O **Farmácia Manager** é um sistema que está sendo desenvolvido com o objetivo de reunir, em um único lugar, diferentes atividades importantes da rotina de uma farmácia.
 
-A proposta é centralizar diferentes processos em um único sistema, permitindo o gerenciamento de:
+A ideia é criar uma ferramenta simples de utilizar, mas que possa oferecer recursos suficientes para ajudar no controle da operação diária.
 
-- 💊 Medicamentos
-- 📦 Estoque
-- 🏷️ Lotes
-- 📅 Validades
-- 🔄 Movimentações de estoque
-- 👥 Clientes
+Entre as áreas que o projeto pretende atender estão:
+
+- 📦 Controle de estoque
+- 💊 Cadastro e consulta de medicamentos
+- 🏷️ Controle de lotes
+- 📅 Controle de validade
+- 🔄 Registro de entradas e saídas
+- 👥 Cadastro de clientes
 - 🧑‍⚕️ Atendimento farmacêutico
-- 📋 Receitas
-- 💉 Dispensação de medicamentos
-- 👤 Funcionários e usuários
-- 🔐 Permissões de acesso
-- 📊 Dashboard
+- 📋 Controle de receitas
+- 💉 Registro de dispensações
+- 📊 Painel de informações
 - 📈 Relatórios
-- 📝 Auditoria e histórico de operações
+- 👤 Controle de usuários e funcionários
 
-O projeto está sendo desenvolvido de forma **incremental**, começando por funcionalidades fundamentais e evoluindo gradualmente para uma solução mais completa.
+O sistema está sendo construído por etapas. Algumas funcionalidades já estão em desenvolvimento e outras fazem parte do planejamento futuro.
 
 ---
 
-# 🎯 Objetivo
+# 🎯 Qual é a ideia do Farmácia Manager?
 
-O principal objetivo do projeto é desenvolver uma aplicação que possa auxiliar uma farmácia no gerenciamento de suas operações internas, reduzindo processos manuais e centralizando informações importantes.
+A ideia principal é **centralizar informações e facilitar a rotina da farmácia**.
 
-Além do objetivo técnico e educacional, o projeto possui uma possível finalidade comercial futura.
+Em vez de depender de diferentes controles, anotações ou processos separados, o sistema busca reunir as informações importantes em um único ambiente.
 
-A intenção é desenvolver inicialmente um protótipo funcional, validá-lo com profissionais da área farmacêutica e, a partir do feedback obtido, evoluir o sistema.
-
-### Fluxo planejado
+Por exemplo:
 
 ```text
                     FARMÁCIA
                        │
-          ┌────────────┼────────────┐
-          │            │            │
-          ▼            ▼            ▼
-       ESTOQUE     ATENDIMENTO   RECEITAS
-          │            │            │
-          │            │            ▼
-          │            │       DISPENSAÇÃO
-          │            │            │
-          └────────────┴────────────┘
-                       │
                        ▼
-                HISTÓRICO / RELATÓRIOS
+              ┌─────────────────┐
+              │ FARMÁCIA MANAGER│
+              └────────┬────────┘
+                       │
+       ┌───────────────┼────────────────┐
+       │               │                │
+       ▼               ▼                ▼
+   📦 ESTOQUE      🧑‍⚕️ ATENDIMENTO   📋 RECEITAS
+       │               │                │
+       ▼               ▼                ▼
+    LOTES          HISTÓRICO        DISPENSAÇÃO
+       │                                │
+       ▼                                ▼
+  VALIDADES                       ATUALIZA ESTOQUE
+       │
+       └───────────────┬────────────────┘
+                       ▼
+                 📊 INFORMAÇÕES
+                   E RELATÓRIOS
