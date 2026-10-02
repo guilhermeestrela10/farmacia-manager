@@ -1,64 +1,75 @@
 # 💊 Farmácia Manager
 
-### Sistema de gestão para farmácias
+### Sistema de gestão inteligente para farmácias
 
-> Um projeto em desenvolvimento para tornar a rotina da farmácia mais organizada, prática e fácil de acompanhar.
+<p align="center">
+  <strong>Organização • Controle • Segurança • Informação</strong>
+</p>
+
+<p align="center">
+  Um projeto em desenvolvimento com o objetivo de centralizar processos importantes da rotina de uma farmácia em uma única plataforma.
+</p>
 
 ---
 
 ## 📌 Sobre o projeto
 
-O **Farmácia Manager** é um sistema que está sendo desenvolvido com o objetivo de reunir, em um único lugar, diferentes atividades importantes da rotina de uma farmácia.
+O **Farmácia Manager** é um projeto de sistema de gestão desenvolvido com o objetivo de auxiliar na organização e no controle das atividades realizadas diariamente em uma farmácia.
 
-A ideia é criar uma ferramenta simples de utilizar, mas que possa oferecer recursos suficientes para ajudar no controle da operação diária.
+A proposta é construir uma plataforma que reúna diferentes áreas da operação em um único ambiente, permitindo que informações importantes sejam registradas, consultadas e acompanhadas de maneira mais organizada.
 
-Entre as áreas que o projeto pretende atender estão:
+O projeto começou inicialmente pelo **controle de estoque**, mas foi planejado para crescer gradualmente e futuramente integrar outras áreas importantes, como:
 
-- 📦 Controle de estoque
-- 💊 Cadastro e consulta de medicamentos
+- 📦 Gestão de estoque
+- 💊 Cadastro de medicamentos
 - 🏷️ Controle de lotes
 - 📅 Controle de validade
-- 🔄 Registro de entradas e saídas
+- 🔄 Movimentações de estoque
 - 👥 Cadastro de clientes
 - 🧑‍⚕️ Atendimento farmacêutico
 - 📋 Controle de receitas
 - 💉 Registro de dispensações
-- 📊 Painel de informações
+- 📊 Dashboard gerencial
 - 📈 Relatórios
-- 👤 Controle de usuários e funcionários
+- 👤 Usuários e permissões
+- 🔐 Segurança e auditoria
 
-O sistema está sendo construído por etapas. Algumas funcionalidades já estão em desenvolvimento e outras fazem parte do planejamento futuro.
+O sistema está sendo desenvolvido de forma incremental, começando por uma base sólida e evoluindo conforme novas necessidades são identificadas.
 
 ---
 
-# 🎯 Qual é a ideia do Farmácia Manager?
+# 🎯 Objetivo
 
-A ideia principal é **centralizar informações e facilitar a rotina da farmácia**.
+O principal objetivo do Farmácia Manager é **facilitar a organização das informações e dos processos da farmácia**.
 
-Em vez de depender de diferentes controles, anotações ou processos separados, o sistema busca reunir as informações importantes em um único ambiente.
+A ideia não é simplesmente criar várias telas e funcionalidades.
+
+O objetivo é construir um sistema no qual os diferentes setores possam trabalhar de maneira integrada.
 
 Por exemplo:
 
 ```text
-                    FARMÁCIA
-                       │
-                       ▼
-              ┌─────────────────┐
-              │ FARMÁCIA MANAGER│
-              └────────┬────────┘
-                       │
-       ┌───────────────┼────────────────┐
-       │               │                │
-       ▼               ▼                ▼
-   📦 ESTOQUE      🧑‍⚕️ ATENDIMENTO   📋 RECEITAS
-       │               │                │
-       ▼               ▼                ▼
-    LOTES          HISTÓRICO        DISPENSAÇÃO
-       │                                │
-       ▼                                ▼
-  VALIDADES                       ATUALIZA ESTOQUE
-       │
-       └───────────────┬────────────────┘
-                       ▼
-                 📊 INFORMAÇÕES
-                   E RELATÓRIOS
+                    ┌──────────────────┐
+                    │     FARMÁCIA     │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                  ┌─────────────────────┐
+                  │   FARMÁCIA MANAGER  │
+                  └──────────┬──────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+          ▼                  ▼                  ▼
+     📦 ESTOQUE        🧑‍⚕️ ATENDIMENTO     📋 RECEITAS
+          │                  │                  │
+          ▼                  ▼                  ▼
+       LOTES             HISTÓRICO          DISPENSAÇÃO
+          │                                     │
+          ▼                                     ▼
+      VALIDADES                         MOVIMENTAÇÃO
+          │                                     │
+          └─────────────────┬───────────────────┘
+                            ▼
+                    📊 INFORMAÇÕES
+                     E RELATÓRIOS
