@@ -1,5 +1,7 @@
 package com.farmacia.farmacia.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.farmacia.farmacia.dto.EntradaEstoqueRequest;
 import com.farmacia.farmacia.dto.LoteResponse;
 import com.farmacia.farmacia.dto.MovimentacaoResponse;
+import com.farmacia.farmacia.dto.SaidaEstoqueRequest;
 import com.farmacia.farmacia.dto.SaldoResponse;
 import com.farmacia.farmacia.model.Lote;
 import com.farmacia.farmacia.model.Medicamento;
@@ -36,15 +39,7 @@ public class EstoqueService {
 
     @Transactional
     public MovimentacaoResponse registrarEntrada(EntradaEstoqueRequest request) {
-        Medicamento medicamento = medicamentoRepository.findById(request.medicamentoId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_ENTITY, "Medicamento não encontrado."));
-
-        if (!medicamento.isAtivo()) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNPROCESSABLE_ENTITY, "Medicamento desativado.");
-        }
-
+        Medicamento medicamento = buscarMedicamentoAtivo(request.medicamentoId());
         String numeroLote = request.numeroLote().trim();
 
         Lote lote = loteRepository
@@ -67,6 +62,47 @@ public class EstoqueService {
                 request.responsavel().trim());
 
         return toResponse(movimentacaoRepository.save(movimentacao));
+    }
+
+    @Transactional
+    public List<MovimentacaoResponse> registrarSaida(SaidaEstoqueRequest request) {
+        Medicamento medicamento = buscarMedicamentoAtivo(request.medicamentoId());
+
+        List<Lote> lotes = loteRepository
+                .buscarDisponiveisParaSaida(medicamento.getId(), LocalDate.now());
+
+        int disponivel = lotes.stream().mapToInt(Lote::getQuantidadeAtual).sum();
+        int pedido = request.quantidade();
+
+        if (disponivel < pedido) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Estoque insuficiente. Disponível para saída: " + disponivel + ".");
+        }
+
+        String motivo = normalizar(request.motivo());
+        String responsavel = request.responsavel().trim();
+
+        List<MovimentacaoResponse> movimentacoes = new ArrayList<>();
+        int restante = pedido;
+
+        for (Lote lote : lotes) {
+            if (restante == 0) {
+                break;
+            }
+
+            int retirada = Math.min(restante, lote.getQuantidadeAtual());
+            lote.remover(retirada);
+
+            MovimentacaoEstoque movimentacao = movimentacaoRepository.save(
+                    new MovimentacaoEstoque(
+                            lote, TipoMovimentacao.SAIDA, retirada, motivo, responsavel));
+
+            movimentacoes.add(toResponse(movimentacao));
+            restante -= retirada;
+        }
+
+        return movimentacoes;
     }
 
     @Transactional(readOnly = true)
@@ -98,6 +134,19 @@ public class EstoqueService {
         return medicamentoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Medicamento não encontrado."));
+    }
+
+    private Medicamento buscarMedicamentoAtivo(Long id) {
+        Medicamento medicamento = medicamentoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY, "Medicamento não encontrado."));
+
+        if (!medicamento.isAtivo()) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY, "Medicamento desativado.");
+        }
+
+        return medicamento;
     }
 
     private String normalizar(String texto) {

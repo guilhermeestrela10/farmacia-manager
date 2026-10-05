@@ -53,6 +53,13 @@ public class Lote {
         this.quantidadeAtual += quantidade;
     }
 
+    public void remover(int quantidade) {
+        if (quantidade > this.quantidadeAtual) {
+            throw new IllegalStateException("Quantidade maior que o saldo do lote.");
+        }
+        this.quantidadeAtual -= quantidade;
+    }
+
     public Long getId() {
         return id;
     }

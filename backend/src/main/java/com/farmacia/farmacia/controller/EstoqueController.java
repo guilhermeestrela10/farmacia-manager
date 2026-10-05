@@ -3,6 +3,7 @@ package com.farmacia.farmacia.controller;
 import com.farmacia.farmacia.dto.EntradaEstoqueRequest;
 import com.farmacia.farmacia.dto.LoteResponse;
 import com.farmacia.farmacia.dto.MovimentacaoResponse;
+import com.farmacia.farmacia.dto.SaidaEstoqueRequest;
 import com.farmacia.farmacia.dto.SaldoResponse;
 import com.farmacia.farmacia.service.EstoqueService;
 import jakarta.validation.Valid;
@@ -31,6 +32,13 @@ public class EstoqueController {
     public MovimentacaoResponse registrarEntrada(
             @Valid @RequestBody EntradaEstoqueRequest request) {
         return service.registrarEntrada(request);
+    }
+
+    @PostMapping("/saidas")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<MovimentacaoResponse> registrarSaida(
+            @Valid @RequestBody SaidaEstoqueRequest request) {
+        return service.registrarSaida(request);
     }
 
     @GetMapping("/medicamentos/{medicamentoId}/lotes")
