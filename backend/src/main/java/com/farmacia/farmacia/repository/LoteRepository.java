@@ -33,4 +33,8 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
             + "order by l.validade, l.id")
     List<Lote> buscarDisponiveisParaSaida(@Param("medicamentoId") Long medicamentoId,
                                           @Param("hoje") LocalDate hoje);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select l from Lote l where l.id = :id")
+    Optional<Lote> buscarPorIdComTravamento(@Param("id") Long id);
 }

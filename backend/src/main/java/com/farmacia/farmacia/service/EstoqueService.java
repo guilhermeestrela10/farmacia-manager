@@ -1,17 +1,24 @@
 package com.farmacia.farmacia.service;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.farmacia.farmacia.dto.AjusteEstoqueRequest;
 import com.farmacia.farmacia.dto.EntradaEstoqueRequest;
 import com.farmacia.farmacia.dto.LoteResponse;
 import com.farmacia.farmacia.dto.MovimentacaoResponse;
+import com.farmacia.farmacia.dto.PerdaEstoqueRequest;
 import com.farmacia.farmacia.dto.SaidaEstoqueRequest;
 import com.farmacia.farmacia.dto.SaldoResponse;
 import com.farmacia.farmacia.model.Lote;
@@ -21,6 +28,8 @@ import com.farmacia.farmacia.model.TipoMovimentacao;
 import com.farmacia.farmacia.repository.LoteRepository;
 import com.farmacia.farmacia.repository.MedicamentoRepository;
 import com.farmacia.farmacia.repository.MovimentacaoEstoqueRepository;
+
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class EstoqueService {
@@ -105,6 +114,95 @@ public class EstoqueService {
         return movimentacoes;
     }
 
+    @Transactional
+    public MovimentacaoResponse registrarAjuste(AjusteEstoqueRequest request) {
+        TipoMovimentacao tipo = request.tipo();
+
+        if (tipo != TipoMovimentacao.AJUSTE_ENTRADA && tipo != TipoMovimentacao.AJUSTE_SAIDA) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Tipo inválido para ajuste. Use AJUSTE_ENTRADA ou AJUSTE_SAIDA.");
+        }
+
+        Lote lote = buscarLoteComTravamento(request.loteId());
+        int quantidade = request.quantidade();
+
+        if (tipo == TipoMovimentacao.AJUSTE_ENTRADA) {
+            lote.adicionar(quantidade);
+        } else {
+            baixar(lote, quantidade);
+        }
+
+        MovimentacaoEstoque movimentacao = new MovimentacaoEstoque(
+                lote, tipo, quantidade, request.motivo().trim(), request.responsavel().trim());
+
+        return toResponse(movimentacaoRepository.save(movimentacao));
+    }
+
+    @Transactional
+    public MovimentacaoResponse registrarPerda(PerdaEstoqueRequest request) {
+        Lote lote = buscarLoteComTravamento(request.loteId());
+        int quantidade = request.quantidade();
+
+        baixar(lote, quantidade);
+
+        MovimentacaoEstoque movimentacao = new MovimentacaoEstoque(
+                lote,
+                TipoMovimentacao.PERDA,
+                quantidade,
+                request.motivo().trim(),
+                request.responsavel().trim());
+
+        return toResponse(movimentacaoRepository.save(movimentacao));
+    }
+
+    @Transactional(readOnly = true)
+    public List<MovimentacaoResponse> listarMovimentacoes(Long medicamentoId,
+                                                          TipoMovimentacao tipo,
+                                                          LocalDate de,
+                                                          LocalDate ate,
+                                                          int limite) {
+        if (de != null && ate != null && ate.isBefore(de)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "A data final não pode ser anterior à inicial.");
+        }
+
+        ZoneId zona = ZoneId.systemDefault();
+
+        Specification<MovimentacaoEstoque> filtro = (root, query, cb) -> {
+            List<Predicate> condicoes = new ArrayList<>();
+
+            if (medicamentoId != null) {
+                condicoes.add(cb.equal(
+                        root.get("lote").get("medicamento").get("id"), medicamentoId));
+            }
+            if (tipo != null) {
+                condicoes.add(cb.equal(root.get("tipo"), tipo));
+            }
+            if (de != null) {
+                condicoes.add(cb.greaterThanOrEqualTo(
+                        root.<Instant>get("dataHora"), de.atStartOfDay(zona).toInstant()));
+            }
+            if (ate != null) {
+                condicoes.add(cb.lessThan(
+                        root.<Instant>get("dataHora"),
+                        ate.plusDays(1).atStartOfDay(zona).toInstant()));
+            }
+
+            return cb.and(condicoes.toArray(new Predicate[0]));
+        };
+
+        int tamanho = Math.min(Math.max(limite, 1), 500);
+        PageRequest pagina = PageRequest.of(
+                0, tamanho, Sort.by(Sort.Direction.DESC, "dataHora", "id"));
+
+        return movimentacaoRepository.findAll(filtro, pagina)
+                .getContent()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public List<LoteResponse> listarLotes(Long medicamentoId) {
         Medicamento medicamento = buscarMedicamento(medicamentoId);
@@ -128,6 +226,21 @@ public class EstoqueService {
                 saldo,
                 medicamento.getEstoqueMinimo(),
                 saldo <= medicamento.getEstoqueMinimo());
+    }
+
+    private void baixar(Lote lote, int quantidade) {
+        if (quantidade > lote.getQuantidadeAtual()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Quantidade maior que o saldo do lote (" + lote.getQuantidadeAtual() + ").");
+        }
+        lote.remover(quantidade);
+    }
+
+    private Lote buscarLoteComTravamento(Long id) {
+        return loteRepository.buscarPorIdComTravamento(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY, "Lote não encontrado."));
     }
 
     private Medicamento buscarMedicamento(Long id) {
