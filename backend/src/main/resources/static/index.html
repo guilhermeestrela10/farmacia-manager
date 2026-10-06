@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <aside class="menu">
+    <div class="marca">
+      <span class="capsula" aria-hidden="true"></span>
+      <div>
+        <strong>Farmácias Ruanna</strong>
+        <small>A saúde da comunidade</small>
+      </div>
+    </div>
+    <nav>
+      <a class="ativo" href="index.html">Painel</a>
+      <a class="em-breve">Medicamentos</a>
+      <a class="em-breve">Estoque</a>
+      <a class="em-breve">Histórico</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="topo">
+      <h1>Painel</h1>
+      <label>Vencimento em
+        <select id="dias">
+          <option value="30">30 dias</option>
+          <option value="60">60 dias</option>
+          <option value="90" selected>90 dias</option>
+        </select>
+      </label>
+    </header>
+
+    <p id="erro" class="erro" hidden></p>
+    <section id="cartoes" class="cartoes"></section>
+
+    <section class="paineis">
+      <article class="painel"><h2>Sem estoque</h2><ul id="lista-sem-estoque"></ul></article>
+      <article class="painel"><h2>Estoque baixo</h2><ul id="lista-estoque-baixo"></ul></article>
+      <article class="painel"><h2>Vencimento próximo</h2><ul id="lista-vencimento"></ul></article>
+      <article class="painel"><h2>Vencidos com saldo</h2><ul id="lista-vencidos"></ul></article>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
