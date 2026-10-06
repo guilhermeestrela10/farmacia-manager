@@ -1,25 +1,3 @@
-const $ = (id) => document.getElementById(id);
-
-async function buscar(caminho) {
-  const resposta = await fetch(caminho);
-  if (!resposta.ok) {
-    throw new Error(caminho + " respondeu " + resposta.status);
-  }
-  return resposta.json();
-}
-
-function criar(tag, classe, texto) {
-  const elemento = document.createElement(tag);
-  if (classe) elemento.className = classe;
-  if (texto !== undefined) elemento.textContent = texto;
-  return elemento;
-}
-
-function dataBR(iso) {
-  const [ano, mes, dia] = iso.split("-");
-  return dia + "/" + mes + "/" + ano;
-}
-
 function dias(n) {
   return n === 1 ? "1 dia" : n + " dias";
 }
@@ -67,15 +45,15 @@ function renderLista(id, itens, montar, mensagemVazia) {
 
 async function carregar() {
   const prazoEscolhido = $("dias").value;
-  $("erro").hidden = true;
+  limparErro();
 
   try {
     const [resumo, semEstoque, baixo, vencendo, vencidos] = await Promise.all([
-      buscar("/alertas/resumo?dias=" + prazoEscolhido),
-      buscar("/alertas/sem-estoque"),
-      buscar("/alertas/estoque-baixo"),
-      buscar("/alertas/vencimento-proximo?dias=" + prazoEscolhido),
-      buscar("/alertas/vencidos"),
+      requisitar("/alertas/resumo?dias=" + prazoEscolhido),
+      requisitar("/alertas/sem-estoque"),
+      requisitar("/alertas/estoque-baixo"),
+      requisitar("/alertas/vencimento-proximo?dias=" + prazoEscolhido),
+      requisitar("/alertas/vencidos"),
     ]);
 
     renderCartoes(resumo);
@@ -99,9 +77,7 @@ async function carregar() {
         prazo(l.diasParaVencer) + " · " + l.quantidadeAtual + " un."],
       "Nenhum lote vencido com saldo.");
   } catch (erro) {
-    $("erro").textContent =
-      "Não foi possível carregar o painel. A aplicação está rodando? (" + erro.message + ")";
-    $("erro").hidden = false;
+    mostrarErro("Não foi possível carregar o painel. " + erro.message);
   }
 }
 

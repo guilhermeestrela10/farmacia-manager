@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medicamentos | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <aside class="menu">
+    <div class="marca">
+      <span class="capsula" aria-hidden="true"></span>
+      <div>
+        <strong>Farmácias Ruanna</strong>
+        <small>A saúde da comunidade</small>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html">Painel</a>
+      <a class="ativo" href="medicamentos.html">Medicamentos</a>
+      <a class="em-breve">Estoque</a>
+      <a class="em-breve">Histórico</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="topo">
+      <h1>Medicamentos</h1>
+      <button id="novo" class="btn" type="button">+ Novo medicamento</button>
+    </header>
+
+    <div class="barra">
+      <input id="busca" type="search" placeholder="Buscar pelo nome...">
+      <label><input id="inativos" type="checkbox"> Mostrar inativos</label>
+    </div>
+
+    <p id="erro" class="erro" hidden></p>
+    <p id="aviso" class="aviso" hidden></p>
+
+    <div class="tabela-area">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Fabricante</th>
+            <th class="num">Preço</th>
+            <th class="num">Mínimo</th>
+            <th>Situação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <p id="vazio" class="vazio" hidden style="padding: 16px">Nenhum medicamento encontrado.</p>
+    </div>
+  </main>
+
+  <dialog id="janela">
+    <form id="formulario">
+      <h2 id="titulo-form">Novo medicamento</h2>
+
+      <label class="campo">Nome
+        <input id="nome" type="text" maxlength="150" required>
+      </label>
+
+      <label class="campo">Código de barras (opcional)
+        <input id="codigo" type="text" maxlength="20">
+      </label>
+
+      <div class="campo">
+        <label for="categoria">Categoria</label>
+        <div class="com-botao">
+          <select id="categoria" required></select>
+          <button id="nova-categoria" class="btn sec mini" type="button">+ Nova</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="fabricante">Fabricante</label>
+        <div class="com-botao">
+          <select id="fabricante" required></select>
+          <button id="novo-fabricante" class="btn sec mini" type="button">+ Novo</button>
+        </div>
+      </div>
+
+      <div class="dupla">
+        <label class="campo">Preço (R$)
+          <input id="preco" type="number" step="0.01" min="0.01" required>
+        </label>
+        <label class="campo">Estoque mínimo
+          <input id="minimo" type="number" step="1" min="0" value="0" required>
+        </label>
+      </div>
+
+      <p id="erro-form" class="erro" hidden></p>
+
+      <div class="rodape-form">
+        <button id="cancelar" class="btn sec" type="button">Cancelar</button>
+        <button class="btn" type="submit">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/comum.js"></script>
+  <script src="js/medicamentos.js"></script>
+</body>
+</html>

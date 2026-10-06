@@ -8,6 +8,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -18,6 +19,7 @@ body {
   color: var(--texto);
 }
 
+/* ---------- Menu lateral ---------- */
 .menu { width: 230px; flex: none; background: var(--vermelho); color: #fff; }
 
 .marca {
@@ -48,16 +50,59 @@ body {
   font-weight: 600;
   text-decoration: none;
 }
+.menu nav a:hover { background: var(--vermelho-escuro); }
 .menu nav a.ativo { background: var(--amarelo); color: var(--vermelho-escuro); }
 .menu nav a.em-breve { opacity: .6; cursor: default; }
+.menu nav a.em-breve:hover { background: none; }
 .menu nav a.em-breve::after { content: " (em breve)"; font-size: 11px; }
 
+/* ---------- Conteúdo ---------- */
 main { flex: 1; min-width: 0; padding: 24px; }
 
 .topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 h1 { margin: 0; color: var(--vermelho-escuro); }
-select { padding: 6px 10px; border: 1px solid var(--borda); border-radius: 8px; }
 
+input, select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+}
+input:focus, select:focus { outline: 2px solid var(--amarelo); border-color: var(--vermelho); }
+
+/* ---------- Botões ---------- */
+.btn {
+  padding: 8px 14px;
+  border: 2px solid var(--vermelho);
+  border-radius: 8px;
+  background: var(--vermelho);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { background: var(--vermelho-escuro); border-color: var(--vermelho-escuro); }
+.btn.sec { background: #fff; color: var(--vermelho-escuro); }
+.btn.sec:hover { background: #fff0f0; }
+.btn.mini { padding: 8px 12px; }
+
+/* ---------- Avisos ---------- */
+.erro {
+  padding: 10px;
+  border: 1px solid var(--vermelho);
+  border-radius: 8px;
+  background: #fff0f0;
+  color: var(--vermelho-escuro);
+}
+.aviso {
+  padding: 10px;
+  border: 1px solid #c9a400;
+  border-radius: 8px;
+  background: #fff8d6;
+}
+
+/* ---------- Painel (cartões e listas) ---------- */
 .cartoes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -87,13 +132,51 @@ select { padding: 6px 10px; border: 1px solid var(--borda); border-radius: 8px; 
 .painel li span { display: block; font-size: 13px; color: #555; }
 .vazio { color: #777; font-style: italic; }
 
-.erro {
-  padding: 10px;
-  border: 1px solid var(--vermelho);
-  border-radius: 8px;
-  background: #fff0f0;
-  color: var(--vermelho-escuro);
+/* ---------- Medicamentos (barra, tabela, janela) ---------- */
+.barra { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 16px; }
+.barra input[type="search"] { flex: 1; min-width: 220px; }
+.barra label { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+
+.tabela-area { overflow-x: auto; background: #fff; border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 12px;
+  background: var(--vermelho);
+  color: #fff;
+  text-align: left;
+  font-size: 13px;
 }
+td { padding: 10px 12px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+td small { display: block; color: #666; font-size: 12px; }
+td.num, th.num { text-align: right; }
+tr.inativo td { color: #888; background: #fafafa; }
+td.acoes { display: flex; gap: 8px; }
+
+.selo {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.selo.ok { background: var(--amarelo); color: #5b4a00; }
+.selo.off { background: #e0e0e0; color: #555; }
+
+dialog { width: min(520px, 94vw); padding: 0; border: none; border-radius: 12px; }
+dialog::backdrop { background: rgba(0, 0, 0, .5); }
+dialog form { padding: 20px; }
+dialog h2 {
+  margin: 0 0 16px;
+  padding-bottom: 6px;
+  color: var(--vermelho-escuro);
+  border-bottom: 3px solid var(--amarelo);
+}
+.campo { display: block; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+.campo input, .campo select { display: block; width: 100%; margin-top: 4px; font-weight: 400; }
+.com-botao { display: flex; gap: 6px; }
+.com-botao select { flex: 1; }
+.dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rodape-form { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 
 @media (max-width: 800px) {
   body { flex-direction: column; }
