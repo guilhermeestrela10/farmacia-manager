@@ -1,0 +1,14 @@
+.selo.bom { background: #e3f4e8; color: #1d6b32; }
+.selo.atencao { background: var(--amarelo); color: #5b4a00; }
+.selo.vencido { background: var(--vermelho); color: #fff; }
+
+.barra select { min-width: 280px; max-width: 100%; }
+.barra .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.dica {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff8d6;
+  font-size: 14px;
+}

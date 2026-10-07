@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estoque | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/estoque.css">
+</head>
+<body>
+  <aside class="menu">
+    <div class="marca">
+      <span class="capsula" aria-hidden="true"></span>
+      <div>
+        <strong>Farmácias Ruanna</strong>
+        <small>A saúde da comunidade</small>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html">Painel</a>
+      <a href="medicamentos.html">Medicamentos</a>
+      <a class="ativo" href="estoque.html">Estoque</a>
+      <a class="em-breve">Histórico</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="topo">
+      <h1>Estoque</h1>
+    </header>
+
+    <div class="barra">
+      <label>Medicamento
+        <select id="medicamento"></select>
+      </label>
+      <button id="btn-entrada" class="btn" type="button" disabled>+ Entrada</button>
+      <button id="btn-saida" class="btn sec" type="button" disabled>− Saída</button>
+    </div>
+
+    <p id="erro" class="erro" hidden></p>
+    <p id="aviso" class="aviso" hidden></p>
+
+    <section id="cartoes" class="cartoes" hidden></section>
+
+    <div id="area-lotes" class="tabela-area" hidden>
+      <table>
+        <thead>
+          <tr>
+            <th>Lote</th>
+            <th>Validade</th>
+            <th>Situação</th>
+            <th class="num">Quantidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <p id="vazio" class="vazio" hidden style="padding: 16px">Nenhum lote com saldo.</p>
+    </div>
+  </main>
+
+  <dialog id="janela">
+    <form id="formulario">
+      <h2 id="titulo-form">Operação</h2>
+
+      <p id="resumo-lote" class="dica" hidden></p>
+
+      <label id="campo-lote" class="campo">Número do lote
+        <input id="numero-lote" type="text" maxlength="50">
+      </label>
+
+      <label id="campo-validade" class="campo">Validade
+        <input id="validade" type="date">
+      </label>
+
+      <label id="campo-tipo" class="campo">Tipo de ajuste
+        <select id="tipo">
+          <option value="AJUSTE_ENTRADA">Sobrou: soma ao lote</option>
+          <option value="AJUSTE_SAIDA">Faltou: tira do lote</option>
+        </select>
+      </label>
+
+      <label class="campo">Quantidade
+        <input id="quantidade" type="number" min="1" step="1" required>
+      </label>
+
+      <label class="campo"><span id="rotulo-motivo">Motivo</span>
+        <input id="motivo" type="text" maxlength="200">
+      </label>
+
+      <label class="campo">Responsável
+        <input id="responsavel" type="text" maxlength="100" required>
+      </label>
+
+      <p id="erro-form" class="erro" hidden></p>
+
+      <div class="rodape-form">
+        <button id="cancelar" class="btn sec" type="button">Cancelar</button>
+        <button id="confirmar" class="btn" type="submit">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/comum.js"></script>
+  <script src="js/estoque.js"></script>
+</body>
+</html>
