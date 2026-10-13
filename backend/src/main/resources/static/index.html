@@ -3,50 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Painel | Farmácias Ruanna</title>
+  <title>Dashboard | Farmácias Ruanna</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
 </head>
-<body>
-  <aside class="menu">
-    <div class="marca">
-      <span class="capsula" aria-hidden="true"></span>
-      <div>
-        <strong>Farmácias Ruanna</strong>
-        <small>A saúde da comunidade</small>
-      </div>
-    </div>
-    <nav>
-      <a class="ativo" href="index.html">Painel</a>
-      <a href="medicamentos.html">Medicamentos</a>
-      <a href="estoque.html">Estoque</a>
-      <a class="em-breve">Histórico</a>
-    </nav>
-  </aside>
-
+<body class="com-layout" data-pagina="dashboard">
   <main>
-    <header class="topo">
-      <h1>Painel</h1>
-      <label>Vencimento em
-        <select id="dias">
-          <option value="30">30 dias</option>
-          <option value="60">60 dias</option>
-          <option value="90" selected>90 dias</option>
-        </select>
-      </label>
+    <header class="titulo-pagina">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Visão geral do estoque e alertas em tempo real.</p>
+      </div>
+      <div class="acoes-topo">
+        <a class="btn" href="medicamentos.html">+ Medicamento</a>
+        <a class="btn sec" href="estoque.html">Entrada / Saída</a>
+      </div>
     </header>
 
     <p id="erro" class="erro" hidden></p>
-    <section id="cartoes" class="cartoes"></section>
 
-    <section class="paineis">
-      <article class="painel"><h2>Sem estoque</h2><ul id="lista-sem-estoque"></ul></article>
-      <article class="painel"><h2>Estoque baixo</h2><ul id="lista-estoque-baixo"></ul></article>
-      <article class="painel"><h2>Vencimento próximo</h2><ul id="lista-vencimento"></ul></article>
-      <article class="painel"><h2>Vencidos com saldo</h2><ul id="lista-vencidos"></ul></article>
+    <section id="cartoes" class="cartoes-dash"></section>
+
+    <section class="grade-grafico">
+      <article class="caixa">
+        <h2>Movimentações — últimos 14 dias</h2>
+        <div id="grafico"></div>
+        <div class="legenda">
+          <span><i style="background: #0e8a4f"></i>Entradas</span>
+          <span><i style="background: #d4001a"></i>Saídas</span>
+        </div>
+      </article>
+
+      <article class="caixa">
+        <h2>Alertas importantes</h2>
+        <ul id="lista-alertas" class="lista-alertas"></ul>
+      </article>
+    </section>
+
+    <section class="grade-listas">
+      <article class="caixa"><h2>Próximos do vencimento</h2><ul id="lista-vencimento" class="lista-simples"></ul></article>
+      <article class="caixa"><h2>Últimas entradas</h2><ul id="lista-entradas" class="lista-simples"></ul></article>
+      <article class="caixa"><h2>Últimas saídas</h2><ul id="lista-saidas" class="lista-simples"></ul></article>
     </section>
   </main>
 
   <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
