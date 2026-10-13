@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <main class="cartao-login">
+    <div class="marca">
+      <span class="capsula" aria-hidden="true"></span>
+      <div>
+        <strong>Farmácias Ruanna</strong>
+        <small>A saúde da comunidade</small>
+      </div>
+    </div>
+
+    <form id="formulario">
+      <label>Usuário
+        <input id="login" type="text" autocomplete="username" autofocus required>
+      </label>
+
+      <label>Senha
+        <input id="senha" type="password" autocomplete="current-password" required>
+      </label>
+
+      <p id="erro" class="erro" hidden></p>
+
+      <button id="entrar" type="submit">Entrar</button>
+    </form>
+  </main>
+
+  <script src="js/comum.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

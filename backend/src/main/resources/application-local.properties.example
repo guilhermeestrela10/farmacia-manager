@@ -1,3 +1,7 @@
 spring.datasource.url=jdbc:postgresql://localhost:5432/farmacia_db
 spring.datasource.username=postgres
 spring.datasource.password=troque_aqui
+
+app.admin.nome=Administrador
+app.admin.login=admin
+app.admin.senha=troque_aqui_min_8_caracteres
