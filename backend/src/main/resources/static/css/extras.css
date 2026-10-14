@@ -17,6 +17,9 @@
 .filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 16px; }
 .filtros label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
 .filtros select, .filtros input { font-weight: 400; }
+.filtros .busca-larga { flex: 1; min-width: 260px; }
+.filtros .busca-larga input { width: 100%; }
+.filtros .check-linha { flex-direction: row; align-items: center; gap: 6px; font-weight: 400; }
 
 .nota { margin: 0 0 12px; color: #666; font-size: 13px; }
 

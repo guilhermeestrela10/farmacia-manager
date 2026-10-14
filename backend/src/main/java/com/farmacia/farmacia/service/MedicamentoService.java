@@ -1,20 +1,22 @@
 package com.farmacia.farmacia.service;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.farmacia.farmacia.dto.MedicamentoRequest;
 import com.farmacia.farmacia.dto.MedicamentoResponse;
 import com.farmacia.farmacia.model.Categoria;
 import com.farmacia.farmacia.model.Fabricante;
 import com.farmacia.farmacia.model.Medicamento;
+import com.farmacia.farmacia.model.TipoMedicamento;
 import com.farmacia.farmacia.repository.CategoriaRepository;
 import com.farmacia.farmacia.repository.FabricanteRepository;
 import com.farmacia.farmacia.repository.MedicamentoRepository;
+import java.text.Normalizer;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class MedicamentoService {
@@ -33,7 +35,7 @@ public class MedicamentoService {
 
     @Transactional
     public MedicamentoResponse criar(MedicamentoRequest request) {
-        String codigoBarras = normalizar(request.codigoBarras());
+        String codigoBarras = normalizarCodigo(request.codigoBarras());
 
         if (codigoBarras != null && medicamentoRepository.existsByCodigoBarras(codigoBarras)) {
             throw codigoBarrasDuplicado();
@@ -47,6 +49,7 @@ public class MedicamentoService {
                 codigoBarras,
                 categoria,
                 fabricante,
+                request.tipo(),
                 request.preco(),
                 request.estoqueMinimo());
 
@@ -56,7 +59,7 @@ public class MedicamentoService {
     @Transactional
     public MedicamentoResponse atualizar(Long id, MedicamentoRequest request) {
         Medicamento medicamento = buscarEntidade(id);
-        String codigoBarras = normalizar(request.codigoBarras());
+        String codigoBarras = normalizarCodigo(request.codigoBarras());
 
         if (codigoBarras != null
                 && medicamentoRepository.existsByCodigoBarrasAndIdNot(codigoBarras, id)) {
@@ -71,6 +74,7 @@ public class MedicamentoService {
                 codigoBarras,
                 categoria,
                 fabricante,
+                request.tipo(),
                 request.preco(),
                 request.estoqueMinimo());
 
@@ -92,28 +96,59 @@ public class MedicamentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<MedicamentoResponse> listar(String nome, boolean incluirInativos) {
-        boolean semFiltroDeNome = nome == null || nome.isBlank();
-        List<Medicamento> medicamentos;
+    public List<MedicamentoResponse> listar(String busca, Long categoriaId,
+                                            TipoMedicamento tipo, boolean incluirInativos) {
+        List<String> palavras = palavrasDaBusca(busca);
 
-        if (semFiltroDeNome) {
-            medicamentos = incluirInativos
-                    ? medicamentoRepository.findAllByOrderByNome()
-                    : medicamentoRepository.findByAtivoTrueOrderByNome();
-        } else {
-            String termo = nome.trim();
-            medicamentos = incluirInativos
-                    ? medicamentoRepository.findByNomeContainingIgnoreCaseOrderByNome(termo)
-                    : medicamentoRepository
-                            .findByAtivoTrueAndNomeContainingIgnoreCaseOrderByNome(termo);
-        }
-
-        return medicamentos.stream().map(this::toResponse).toList();
+        return medicamentoRepository.listarTodosComRelacionamentos().stream()
+                .filter(m -> incluirInativos || m.isAtivo())
+                .filter(m -> categoriaId == null || m.getCategoria().getId().equals(categoriaId))
+                .filter(m -> tipo == null || m.getTipo() == tipo)
+                .filter(m -> corresponde(m, palavras))
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public MedicamentoResponse buscarPorId(Long id) {
         return toResponse(buscarEntidade(id));
+    }
+
+    private boolean corresponde(Medicamento m, List<String> palavras) {
+        if (palavras.isEmpty()) {
+            return true;
+        }
+
+        String texto = semAcento(String.join(" ",
+                m.getNome(),
+                m.getCategoria().getNome(),
+                m.getFabricante().getNome(),
+                rotulo(m.getTipo()),
+                m.getCodigoBarras() == null ? "" : m.getCodigoBarras()));
+
+        return palavras.stream().allMatch(texto::contains);
+    }
+
+    private List<String> palavrasDaBusca(String busca) {
+        if (busca == null || busca.isBlank()) {
+            return List.of();
+        }
+        return Arrays.asList(semAcento(busca).split("\\s+"));
+    }
+
+    private String semAcento(String texto) {
+        return Normalizer.normalize(texto, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .trim();
+    }
+
+    private String rotulo(TipoMedicamento tipo) {
+        return switch (tipo) {
+            case REFERENCIA -> "Referência";
+            case GENERICO -> "Genérico";
+            case SIMILAR -> "Similar";
+        };
     }
 
     private Medicamento buscarEntidade(Long id) {
@@ -139,7 +174,7 @@ public class MedicamentoService {
                 HttpStatus.CONFLICT, "Já existe um medicamento com esse código de barras.");
     }
 
-    private String normalizar(String codigoBarras) {
+    private String normalizarCodigo(String codigoBarras) {
         if (codigoBarras == null || codigoBarras.isBlank()) {
             return null;
         }
@@ -155,6 +190,7 @@ public class MedicamentoService {
                 m.getCategoria().getNome(),
                 m.getFabricante().getId(),
                 m.getFabricante().getNome(),
+                m.getTipo(),
                 m.getPreco(),
                 m.getEstoqueMinimo(),
                 m.isAtivo());

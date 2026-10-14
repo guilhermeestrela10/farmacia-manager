@@ -2,6 +2,8 @@ package com.farmacia.farmacia.dto;
 
 import java.math.BigDecimal;
 
+import com.farmacia.farmacia.model.TipoMedicamento;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +23,9 @@ public record MedicamentoRequest(
 
         @NotNull(message = "O fabricante é obrigatório.")
         Long fabricanteId,
+
+        @NotNull(message = "O tipo é obrigatório (Referência, Genérico ou Similar).")
+        TipoMedicamento tipo,
 
         @NotNull(message = "O preço é obrigatório.")
         @Positive(message = "O preço deve ser maior que zero.")

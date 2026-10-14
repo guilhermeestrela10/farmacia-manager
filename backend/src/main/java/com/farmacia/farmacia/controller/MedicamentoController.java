@@ -1,7 +1,11 @@
 package com.farmacia.farmacia.controller;
 
+import com.farmacia.farmacia.dto.MedicamentoRequest;
+import com.farmacia.farmacia.dto.MedicamentoResponse;
+import com.farmacia.farmacia.model.TipoMedicamento;
+import com.farmacia.farmacia.service.MedicamentoService;
+import jakarta.validation.Valid;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,12 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.farmacia.farmacia.dto.MedicamentoRequest;
-import com.farmacia.farmacia.dto.MedicamentoResponse;
-import com.farmacia.farmacia.service.MedicamentoService;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/medicamentos")
@@ -38,9 +36,11 @@ public class MedicamentoController {
 
     @GetMapping
     public List<MedicamentoResponse> listar(
-            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String busca,
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) TipoMedicamento tipo,
             @RequestParam(defaultValue = "false") boolean incluirInativos) {
-        return service.listar(nome, incluirInativos);
+        return service.listar(busca, categoriaId, tipo, incluirInativos);
     }
 
     @GetMapping("/{id}")

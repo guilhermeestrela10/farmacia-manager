@@ -15,13 +15,10 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
 
     boolean existsByCodigoBarrasAndIdNot(String codigoBarras, Long id);
 
-    List<Medicamento> findAllByOrderByNome();
-
-    List<Medicamento> findByAtivoTrueOrderByNome();
-
-    List<Medicamento> findByNomeContainingIgnoreCaseOrderByNome(String nome);
-
-    List<Medicamento> findByAtivoTrueAndNomeContainingIgnoreCaseOrderByNome(String nome);
+    @Query("select m from Medicamento m "
+            + "join fetch m.categoria join fetch m.fabricante "
+            + "order by m.nome")
+    List<Medicamento> listarTodosComRelacionamentos();
 
     @Query("select m.id, m.nome, m.estoqueMinimo, "
             + "coalesce(sum(case when l.validade >= :hoje "

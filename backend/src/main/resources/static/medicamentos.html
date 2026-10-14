@@ -6,6 +6,7 @@
   <title>Medicamentos | Farmácias Ruanna</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
 </head>
 <body class="com-layout" data-pagina="medicamentos">
   <main>
@@ -14,13 +15,33 @@
       <button id="novo" class="btn" type="button">+ Novo medicamento</button>
     </header>
 
-    <div class="barra">
-      <input id="busca" type="search" placeholder="Buscar pelo nome...">
-      <label><input id="inativos" type="checkbox"> Mostrar inativos</label>
+    <div class="filtros">
+      <label class="busca-larga">Busca rápida
+        <input id="busca" type="search" autocomplete="off"
+               placeholder="Nome, categoria, fabricante ou tipo (ex.: dipirona, analgésico, genérico)">
+      </label>
+
+      <label>Categoria
+        <select id="filtro-categoria"></select>
+      </label>
+
+      <label>Tipo
+        <select id="filtro-tipo">
+          <option value="">Todos</option>
+          <option value="REFERENCIA">Referência</option>
+          <option value="GENERICO">Genérico</option>
+          <option value="SIMILAR">Similar</option>
+        </select>
+      </label>
+
+      <label class="check-linha">
+        <input id="inativos" type="checkbox"> Mostrar inativos
+      </label>
     </div>
 
     <p id="erro" class="erro" hidden></p>
     <p id="aviso" class="aviso" hidden></p>
+    <p id="nota" class="nota"></p>
 
     <div class="tabela-area">
       <table>
@@ -29,6 +50,7 @@
             <th>Nome</th>
             <th>Categoria</th>
             <th>Fabricante</th>
+            <th>Tipo</th>
             <th class="num">Preço</th>
             <th class="num">Mínimo</th>
             <th>Situação</th>
@@ -68,6 +90,15 @@
           <button id="novo-fabricante" class="btn sec mini" type="button">+ Novo</button>
         </div>
       </div>
+
+      <label class="campo">Tipo
+        <select id="tipo" required>
+          <option value="">Selecione...</option>
+          <option value="REFERENCIA">Referência</option>
+          <option value="GENERICO">Genérico</option>
+          <option value="SIMILAR">Similar</option>
+        </select>
+      </label>
 
       <div class="dupla">
         <label class="campo">Preço (R$)

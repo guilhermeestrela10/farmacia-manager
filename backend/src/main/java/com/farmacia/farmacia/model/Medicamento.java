@@ -5,6 +5,8 @@ import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,6 +37,10 @@ public class Medicamento {
     @JoinColumn(name = "fabricante_id", nullable = false)
     private Fabricante fabricante;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 15)
+    private TipoMedicamento tipo;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
 
@@ -52,15 +58,37 @@ public class Medicamento {
     }
 
     public Medicamento(String nome, String codigoBarras, Categoria categoria,
-                       Fabricante fabricante, BigDecimal preco, int estoqueMinimo) {
+                       Fabricante fabricante, TipoMedicamento tipo, BigDecimal preco,
+                       int estoqueMinimo) {
         this.nome = nome;
         this.codigoBarras = codigoBarras;
         this.categoria = categoria;
         this.fabricante = fabricante;
+        this.tipo = tipo;
         this.preco = preco;
         this.estoqueMinimo = estoqueMinimo;
         this.ativo = true;
         this.criadoEm = Instant.now();
+    }
+
+    public void atualizar(String nome, String codigoBarras, Categoria categoria,
+                          Fabricante fabricante, TipoMedicamento tipo, BigDecimal preco,
+                          int estoqueMinimo) {
+        this.nome = nome;
+        this.codigoBarras = codigoBarras;
+        this.categoria = categoria;
+        this.fabricante = fabricante;
+        this.tipo = tipo;
+        this.preco = preco;
+        this.estoqueMinimo = estoqueMinimo;
+    }
+
+    public void desativar() {
+        this.ativo = false;
+    }
+
+    public void ativar() {
+        this.ativo = true;
     }
 
     public Long getId() {
@@ -83,6 +111,10 @@ public class Medicamento {
         return fabricante;
     }
 
+    public TipoMedicamento getTipo() {
+        return tipo;
+    }
+
     public BigDecimal getPreco() {
         return preco;
     }
@@ -94,25 +126,8 @@ public class Medicamento {
     public boolean isAtivo() {
         return ativo;
     }
-        public Instant getCriadoEm() {
+
+    public Instant getCriadoEm() {
         return criadoEm;
-    }
-
-    public void atualizar(String nome, String codigoBarras, Categoria categoria,
-                          Fabricante fabricante, BigDecimal preco, int estoqueMinimo) {
-        this.nome = nome;
-        this.codigoBarras = codigoBarras;
-        this.categoria = categoria;
-        this.fabricante = fabricante;
-        this.preco = preco;
-        this.estoqueMinimo = estoqueMinimo;
-    }
-
-    public void desativar() {
-        this.ativo = false;
-    }
-
-    public void ativar() {
-        this.ativo = true;
     }
 }

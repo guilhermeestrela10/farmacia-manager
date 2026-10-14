@@ -3,13 +3,20 @@ let fabricantes = [];
 let medicamentos = [];
 let editandoId = null;
 let esperaBusca;
+let temporizadorAviso;
+
+const TIPOS = {
+  REFERENCIA: ["Referência", "neutro"],
+  GENERICO: ["Genérico", "bom"],
+  SIMILAR: ["Similar", "atencao"],
+};
 
 /* ---------- Listas de apoio (categoria e fabricante) ---------- */
 
-function preencherSelect(select, itens, selecionadoId) {
+function preencherSelect(select, itens, selecionadoId, textoVazio) {
   select.replaceChildren();
 
-  const vazio = criar("option", "", "Selecione...");
+  const vazio = criar("option", "", textoVazio || "Selecione...");
   vazio.value = "";
   select.append(vazio);
 
@@ -22,6 +29,11 @@ function preencherSelect(select, itens, selecionadoId) {
   if (selecionadoId) select.value = String(selecionadoId);
 }
 
+function atualizarFiltroDeCategoria() {
+  preencherSelect($("filtro-categoria"), categorias, $("filtro-categoria").value,
+    "Todas as categorias");
+}
+
 async function carregarListas() {
   [categorias, fabricantes] = await Promise.all([
     requisitar("/categorias"),
@@ -29,6 +41,7 @@ async function carregarListas() {
   ]);
   preencherSelect($("categoria"), categorias);
   preencherSelect($("fabricante"), fabricantes);
+  atualizarFiltroDeCategoria();
 }
 
 async function criarItem(caminho, pergunta, lista, select) {
@@ -39,6 +52,7 @@ async function criarItem(caminho, pergunta, lista, select) {
     const novo = await enviar("POST", caminho, { nome: nome.trim() });
     lista.push(novo);
     preencherSelect(select, lista, novo.id);
+    if (lista === categorias) atualizarFiltroDeCategoria();
     $("erro-form").hidden = true;
   } catch (erro) {
     $("erro-form").textContent = erro.message;
@@ -60,6 +74,10 @@ function renderTabela() {
     nome.append(criar("strong", "", med.nome));
     if (med.codigoBarras) nome.append(criar("small", "", "Cód. " + med.codigoBarras));
 
+    const [rotuloTipo, classeTipo] = TIPOS[med.tipo] || [med.tipo, "neutro"];
+    const tipo = criar("td");
+    tipo.append(criar("span", "selo " + classeTipo, rotuloTipo));
+
     const situacao = criar("td");
     situacao.append(criar("span", "selo " + (med.ativo ? "ok" : "off"),
       med.ativo ? "Ativo" : "Inativo"));
@@ -79,6 +97,7 @@ function renderTabela() {
       nome,
       criar("td", "", med.categoriaNome),
       criar("td", "", med.fabricanteNome),
+      tipo,
       criar("td", "num", moeda(med.preco)),
       criar("td", "num", med.estoqueMinimo),
       situacao,
@@ -86,14 +105,19 @@ function renderTabela() {
 
     corpo.append(linha);
   }
+
+  $("nota").textContent = medicamentos.length
+    + (medicamentos.length === 1 ? " medicamento." : " medicamentos.");
 }
 
 async function carregarLista() {
   limparErro();
 
   const parametros = new URLSearchParams();
-  const nome = $("busca").value.trim();
-  if (nome) parametros.set("nome", nome);
+  const busca = $("busca").value.trim();
+  if (busca) parametros.set("busca", busca);
+  if ($("filtro-categoria").value) parametros.set("categoriaId", $("filtro-categoria").value);
+  if ($("filtro-tipo").value) parametros.set("tipo", $("filtro-tipo").value);
   if ($("inativos").checked) parametros.set("incluirInativos", "true");
 
   try {
@@ -108,7 +132,8 @@ function mostrarAviso(texto) {
   const aviso = $("aviso");
   aviso.textContent = texto;
   aviso.hidden = false;
-  setTimeout(() => { aviso.hidden = true; }, 4000);
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(() => { aviso.hidden = true; }, 4000);
 }
 
 /* ---------- Formulário ---------- */
@@ -121,6 +146,7 @@ function abrirFormulario(med) {
   $("codigo").value = med && med.codigoBarras ? med.codigoBarras : "";
   $("categoria").value = med ? String(med.categoriaId) : "";
   $("fabricante").value = med ? String(med.fabricanteId) : "";
+  $("tipo").value = med ? med.tipo : "";
   $("preco").value = med ? med.preco : "";
   $("minimo").value = med ? med.estoqueMinimo : 0;
   $("erro-form").hidden = true;
@@ -136,6 +162,7 @@ async function salvar(evento) {
     codigoBarras: $("codigo").value.trim() || null,
     categoriaId: Number($("categoria").value) || null,
     fabricanteId: Number($("fabricante").value) || null,
+    tipo: $("tipo").value || null,
     preco: Number($("preco").value),
     estoqueMinimo: Number($("minimo").value),
   };
@@ -179,6 +206,8 @@ $("novo").addEventListener("click", () => abrirFormulario(null));
 $("cancelar").addEventListener("click", () => $("janela").close());
 $("formulario").addEventListener("submit", salvar);
 $("inativos").addEventListener("change", carregarLista);
+$("filtro-categoria").addEventListener("change", carregarLista);
+$("filtro-tipo").addEventListener("change", carregarLista);
 
 $("busca").addEventListener("input", () => {
   clearTimeout(esperaBusca);
