@@ -6,6 +6,7 @@
   <title>Dashboard | Farmácias Ruanna</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
 </head>
 <body class="com-layout" data-pagina="dashboard">
   <main>
@@ -41,9 +42,26 @@
     </section>
 
     <section class="grade-listas">
-      <article class="caixa"><h2>Próximos do vencimento</h2><ul id="lista-vencimento" class="lista-simples"></ul></article>
-      <article class="caixa"><h2>Últimas entradas</h2><ul id="lista-entradas" class="lista-simples"></ul></article>
-      <article class="caixa"><h2>Últimas saídas</h2><ul id="lista-saidas" class="lista-simples"></ul></article>
+      <article class="caixa">
+        <div class="caixa-titulo"><h2>Próximos do vencimento</h2></div>
+        <ul id="lista-vencimento" class="lista-simples"></ul>
+      </article>
+
+      <article class="caixa">
+        <div class="caixa-titulo">
+          <h2>Últimas entradas</h2>
+          <a href="movimentacoes.html?tipo=ENTRADA">Ver todas</a>
+        </div>
+        <ul id="lista-entradas" class="lista-simples"></ul>
+      </article>
+
+      <article class="caixa">
+        <div class="caixa-titulo">
+          <h2>Últimas saídas</h2>
+          <a href="movimentacoes.html?tipo=SAIDA">Ver todas</a>
+        </div>
+        <ul id="lista-saidas" class="lista-simples"></ul>
+      </article>
     </section>
   </main>
 

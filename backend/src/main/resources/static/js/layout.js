@@ -18,15 +18,17 @@ const ICONES = {
   queda: '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>',
   camadas: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
   mais: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  carrinho: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
 };
 
 const MENU = [
   { titulo: "Operação", itens: [
     ["dashboard", "Dashboard", "dashboard", "index.html"],
+    ["vendas", "Vendas", "carrinho", null],
     ["estoque", "Estoque", "estoque", "estoque.html"],
     ["medicamentos", "Medicamentos", "pilula", "medicamentos.html"],
     ["lotes", "Lotes e Validades", "calendario", null],
-    ["movimentacoes", "Movimentações", "movimentacoes", null],
+    ["movimentacoes", "Movimentações", "movimentacoes", "movimentacoes.html"],
   ] },
   { titulo: "Atendimento", itens: [
     ["clientes", "Clientes", "clientes", null],
@@ -36,7 +38,7 @@ const MENU = [
   ] },
   { titulo: "Gestão", soAdmin: true, itens: [
     ["relatorios", "Relatórios", "relatorios", null],
-    ["usuarios", "Usuários e Permissões", "usuarios", null],
+    ["usuarios", "Usuários e Permissões", "usuarios", "gestao-usuarios.html"],
     ["auditoria", "Auditoria", "auditoria", null],
     ["configuracoes", "Configurações", "config", null],
   ] },

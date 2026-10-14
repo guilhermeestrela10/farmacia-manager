@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuários e Permissões | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
+</head>
+<body class="com-layout" data-pagina="usuarios">
+  <main>
+    <header class="topo">
+      <h1>Usuários e Permissões</h1>
+      <button id="novo" class="btn" type="button">+ Novo usuário</button>
+    </header>
+
+    <section class="permissoes">
+      <article class="caixa">
+        <h2>Administrador</h2>
+        <ul>
+          <li>Acessa tudo, inclusive a Gestão.</li>
+          <li>Cria, desativa e reativa usuários.</li>
+          <li>Relatórios e auditoria (em breve).</li>
+        </ul>
+      </article>
+      <article class="caixa">
+        <h2>Vendedor</h2>
+        <ul>
+          <li>Acessa tudo, menos a Gestão.</li>
+          <li>Dashboard, medicamentos, estoque e movimentações.</li>
+          <li>Vendas (em breve).</li>
+        </ul>
+      </article>
+    </section>
+
+    <p id="erro" class="erro" hidden></p>
+    <p id="aviso" class="aviso" hidden></p>
+
+    <div class="tabela-area">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Login</th>
+            <th>Perfil</th>
+            <th>Situação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <p id="vazio" class="vazio" hidden style="padding: 16px">Nenhum usuário encontrado.</p>
+    </div>
+  </main>
+
+  <dialog id="janela">
+    <form id="formulario">
+      <h2>Novo usuário</h2>
+
+      <label class="campo">Nome
+        <input id="nome" type="text" maxlength="100" required>
+      </label>
+
+      <label class="campo">Login
+        <input id="login" type="text" maxlength="50" autocomplete="off" required
+               placeholder="ex.: maria.silva">
+      </label>
+
+      <label class="campo">Senha
+        <input id="senha" type="password" minlength="8" maxlength="72"
+               autocomplete="new-password" required>
+      </label>
+
+      <label class="campo-check">
+        <input id="ver-senha" type="checkbox"> Mostrar senha
+      </label>
+
+      <label class="campo">Perfil
+        <select id="perfil">
+          <option value="VENDEDOR">Vendedor</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </label>
+
+      <p class="nota">Login: de 3 a 50 caracteres (letras, números, ponto, hífen ou sublinhado).
+        Senha: no mínimo 8 caracteres.</p>
+
+      <p id="erro-form" class="erro" hidden></p>
+
+      <div class="rodape-form">
+        <button id="cancelar" class="btn sec" type="button">Cancelar</button>
+        <button id="salvar" class="btn" type="submit">Criar usuário</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/gestao-usuarios.js"></script>
+</body>
+</html>

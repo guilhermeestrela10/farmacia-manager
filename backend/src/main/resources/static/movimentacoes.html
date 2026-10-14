@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Movimentações | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
+</head>
+<body class="com-layout" data-pagina="movimentacoes">
+  <main>
+    <header class="topo">
+      <h1>Movimentações</h1>
+    </header>
+
+    <div class="filtros">
+      <label>Medicamento
+        <select id="f-medicamento"></select>
+      </label>
+
+      <label>Tipo
+        <select id="f-tipo">
+          <option value="">Todos</option>
+          <option value="ENTRADA">Entrada</option>
+          <option value="SAIDA">Saída</option>
+          <option value="AJUSTE_ENTRADA">Ajuste (+)</option>
+          <option value="AJUSTE_SAIDA">Ajuste (−)</option>
+          <option value="PERDA">Perda</option>
+        </select>
+      </label>
+
+      <label>De
+        <input id="f-de" type="date">
+      </label>
+
+      <label>Até
+        <input id="f-ate" type="date">
+      </label>
+
+      <button id="limpar" class="btn sec" type="button">Limpar filtros</button>
+    </div>
+
+    <p id="erro" class="erro" hidden></p>
+    <p id="nota" class="nota"></p>
+
+    <div class="tabela-area">
+      <table>
+        <thead>
+          <tr>
+            <th>Data e hora</th>
+            <th>Medicamento</th>
+            <th>Lote</th>
+            <th>Tipo</th>
+            <th class="num">Quantidade</th>
+            <th>Motivo</th>
+            <th>Responsável</th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <p id="vazio" class="vazio" hidden style="padding: 16px">Nenhuma movimentação encontrada.</p>
+    </div>
+  </main>
+
+  <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/movimentacoes.js"></script>
+</body>
+</html>
