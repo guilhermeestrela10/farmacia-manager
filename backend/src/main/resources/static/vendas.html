@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vendas | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
+  <link rel="stylesheet" href="css/vendas.css">
+</head>
+<body class="com-layout" data-pagina="vendas">
+  <main>
+    <header class="topo">
+      <h1>Nova venda</h1>
+    </header>
+
+    <p id="erro" class="erro" hidden></p>
+    <p id="aviso" class="aviso" hidden></p>
+
+    <div class="venda-grade">
+      <section class="caixa">
+        <div class="filtros">
+          <label class="busca-larga">Buscar medicamento
+            <input id="busca" type="search" autocomplete="off" autofocus
+                   placeholder="Nome, categoria, tipo ou código de barras">
+          </label>
+
+          <label>Categoria
+            <select id="filtro-categoria"></select>
+          </label>
+
+          <label>Tipo
+            <select id="filtro-tipo">
+              <option value="">Todos</option>
+              <option value="REFERENCIA">Referência</option>
+              <option value="GENERICO">Genérico</option>
+              <option value="SIMILAR">Similar</option>
+            </select>
+          </label>
+        </div>
+
+        <p id="nota" class="nota"></p>
+        <ul id="produtos" class="lista-produtos"></ul>
+      </section>
+
+      <aside class="caixa carrinho">
+        <h2>Carrinho</h2>
+
+        <ul id="itens" class="lista-carrinho"></ul>
+        <p id="carrinho-vazio" class="vazio">Nenhum item. Clique em "Adicionar" em um medicamento.</p>
+
+        <div class="total-linha">
+          <span>Total</span>
+          <strong id="total">R$ 0,00</strong>
+        </div>
+
+        <label class="campo">Forma de pagamento
+          <select id="forma">
+            <option value="DINHEIRO">Dinheiro</option>
+            <option value="PIX">Pix</option>
+            <option value="DEBITO">Cartão de débito</option>
+            <option value="CREDITO">Cartão de crédito</option>
+          </select>
+        </label>
+
+        <div id="area-dinheiro">
+          <label class="campo">Valor recebido (R$)
+            <input id="recebido" type="number" step="0.01" min="0">
+          </label>
+          <p id="troco" class="nota"></p>
+        </div>
+
+        <p id="erro-venda" class="erro" hidden></p>
+
+        <div class="rodape-form">
+          <button id="limpar" class="btn sec" type="button">Limpar</button>
+          <button id="finalizar" class="btn" type="button" disabled>Finalizar venda</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="recibo">
+    <div class="recibo-corpo">
+      <h2 id="recibo-titulo">Venda registrada</h2>
+      <p id="recibo-info" class="nota"></p>
+      <ul id="recibo-itens" class="lista-simples"></ul>
+      <div class="total-linha">
+        <span>Total</span>
+        <strong id="recibo-total"></strong>
+      </div>
+      <p id="recibo-pagamento"></p>
+      <div class="rodape-form">
+        <button id="recibo-fechar" class="btn" type="button">Nova venda</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/vendas.js"></script>
+</body>
+</html>

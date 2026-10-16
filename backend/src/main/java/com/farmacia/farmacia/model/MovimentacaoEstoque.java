@@ -1,7 +1,5 @@
 package com.farmacia.farmacia.model;
 
-import java.time.Instant;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 
 @Entity
 @Table(name = "movimentacao_estoque")
@@ -42,17 +41,26 @@ public class MovimentacaoEstoque {
     @Column(name = "data_hora", nullable = false, updatable = false)
     private Instant dataHora;
 
+    @Column(name = "venda_id")
+    private Long vendaId;
+
     protected MovimentacaoEstoque() {
         // exigido pelo JPA
     }
 
     public MovimentacaoEstoque(Lote lote, TipoMovimentacao tipo, int quantidade,
                                String motivo, String responsavel) {
+        this(lote, tipo, quantidade, motivo, responsavel, null);
+    }
+
+    public MovimentacaoEstoque(Lote lote, TipoMovimentacao tipo, int quantidade,
+                               String motivo, String responsavel, Long vendaId) {
         this.lote = lote;
         this.tipo = tipo;
         this.quantidade = quantidade;
         this.motivo = motivo;
         this.responsavel = responsavel;
+        this.vendaId = vendaId;
         this.dataHora = Instant.now();
     }
 
@@ -82,5 +90,9 @@ public class MovimentacaoEstoque {
 
     public Instant getDataHora() {
         return dataHora;
+    }
+
+    public Long getVendaId() {
+        return vendaId;
     }
 }

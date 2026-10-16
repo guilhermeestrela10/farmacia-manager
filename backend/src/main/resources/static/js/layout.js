@@ -24,7 +24,7 @@ const ICONES = {
 const MENU = [
   { titulo: "Operação", itens: [
     ["dashboard", "Dashboard", "dashboard", "index.html"],
-    ["vendas", "Vendas", "carrinho", null],
+    ["vendas", "Vendas", "carrinho", "vendas.html"],
     ["estoque", "Estoque", "estoque", "estoque.html"],
     ["medicamentos", "Medicamentos", "pilula", "medicamentos.html"],
     ["lotes", "Lotes e Validades", "calendario", null],
