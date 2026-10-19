@@ -5,5 +5,6 @@ public enum TipoMovimentacao {
     SAIDA,
     AJUSTE_ENTRADA,
     AJUSTE_SAIDA,
-    PERDA
+    PERDA,
+    ESTORNO
 }

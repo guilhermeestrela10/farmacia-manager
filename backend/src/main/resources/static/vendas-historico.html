@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Histórico de vendas | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
+  <link rel="stylesheet" href="css/vendas.css">
+</head>
+<body class="com-layout" data-pagina="historico-vendas">
+  <main>
+    <header class="topo">
+      <h1>Histórico de vendas</h1>
+      <a class="btn" href="vendas.html">Nova venda</a>
+    </header>
+
+    <div class="filtros">
+      <label>De
+        <input id="f-de" type="date">
+      </label>
+
+      <label>Até
+        <input id="f-ate" type="date">
+      </label>
+
+      <label id="campo-vendedor" hidden>Vendedor
+        <select id="f-vendedor"></select>
+      </label>
+
+      <label>Situação
+        <select id="f-status">
+          <option value="">Todas</option>
+          <option value="CONCLUIDA">Concluídas</option>
+          <option value="CANCELADA">Canceladas</option>
+        </select>
+      </label>
+
+      <button id="hoje" class="btn sec" type="button">Hoje</button>
+    </div>
+
+    <p id="erro" class="erro" hidden></p>
+    <p id="aviso" class="aviso" hidden></p>
+
+    <section id="cartoes" class="cartoes-dash"></section>
+
+    <p id="nota" class="nota"></p>
+
+    <div class="tabela-area">
+      <table>
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Data e hora</th>
+            <th>Vendedor</th>
+            <th>Pagamento</th>
+            <th class="num">Total</th>
+            <th>Situação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <p id="vazio" class="vazio" hidden style="padding: 16px">Nenhuma venda encontrada.</p>
+    </div>
+  </main>
+
+  <dialog id="detalhe">
+    <div class="recibo-corpo">
+      <h2 id="detalhe-titulo">Venda</h2>
+      <p id="detalhe-info" class="nota"></p>
+      <p id="detalhe-cancelamento" class="erro" hidden></p>
+
+      <ul id="detalhe-itens" class="lista-simples"></ul>
+
+      <div class="total-linha">
+        <span>Total</span>
+        <strong id="detalhe-total"></strong>
+      </div>
+
+      <div id="area-cancelar" hidden>
+        <label class="campo">Motivo do cancelamento
+          <input id="motivo-cancelamento" type="text" maxlength="150">
+        </label>
+        <p id="erro-detalhe" class="erro" hidden></p>
+        <button id="cancelar-venda" class="btn" type="button">Cancelar esta venda</button>
+      </div>
+
+      <div class="rodape-form">
+        <button id="fechar-detalhe" class="btn sec" type="button">Fechar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/vendas-historico.js"></script>
+</body>
+</html>

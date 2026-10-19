@@ -6,6 +6,7 @@ const TIPOS = {
   AJUSTE_ENTRADA: ["Ajuste (+)", "atencao", "+"],
   AJUSTE_SAIDA: ["Ajuste (−)", "atencao", "−"],
   PERDA: ["Perda", "vencido", "−"],
+  ESTORNO: ["Estorno", "bom", "+"],
 };
 
 function dataHoraCompleta(iso) {

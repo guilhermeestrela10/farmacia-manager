@@ -14,6 +14,9 @@ public record VendaResponse(
         FormaPagamento formaPagamento,
         BigDecimal total,
         StatusVenda status,
+        Instant canceladaEm,
+        String canceladaPor,
+        String motivoCancelamento,
         List<ItemVendaResponse> itens
 ) {
 }
