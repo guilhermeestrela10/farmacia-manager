@@ -38,7 +38,7 @@ const MENU = [
     ["dispensacoes", "Dispensações", "dispensacoes", null],
   ] },
   { titulo: "Gestão", soAdmin: true, itens: [
-    ["relatorios", "Relatórios", "relatorios", null],
+    ["relatorios", "Relatórios", "relatorios", "gestao-relatorios.html"],
     ["usuarios", "Usuários e Permissões", "usuarios", "gestao-usuarios.html"],
     ["auditoria", "Auditoria", "auditoria", null],
     ["configuracoes", "Configurações", "config", null],

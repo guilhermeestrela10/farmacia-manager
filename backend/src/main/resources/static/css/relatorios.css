@@ -1,0 +1,20 @@
+.secao { margin: 24px 0 12px; font-size: 18px; color: var(--vermelho-escuro); }
+
+#cartoes-vendas b, #cartoes-estoque b { font-size: 24px; }
+
+.grade-duas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.caixa table { width: 100%; }
+.caixa th, .caixa td { padding: 8px; }
+.caixa td.vazio { color: #777; font-style: italic; }
+
+.atalhos { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (max-width: 500px) {
+  .grade-duas { grid-template-columns: 1fr; }
+}

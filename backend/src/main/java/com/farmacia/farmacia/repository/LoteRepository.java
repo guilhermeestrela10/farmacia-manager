@@ -54,4 +54,9 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
             + "where l.quantidadeAtual > 0 and l.validade < :hoje "
             + "order by l.validade, l.id")
     List<Lote> buscarVencidosComSaldo(@Param("hoje") LocalDate hoje);
+
+    @Query("select sum(l.quantidadeAtual), sum(l.quantidadeAtual * l.medicamento.preco) "
+            + "from Lote l "
+            + "where l.quantidadeAtual > 0 and l.validade >= :de and l.validade <= :ate")
+    List<Object[]> resumoPorValidade(@Param("de") LocalDate de, @Param("ate") LocalDate ate);
 }

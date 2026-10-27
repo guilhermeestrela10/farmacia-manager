@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatórios | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
+  <link rel="stylesheet" href="css/relatorios.css">
+</head>
+<body class="com-layout" data-pagina="relatorios">
+  <main>
+    <header class="topo">
+      <h1>Relatórios</h1>
+    </header>
+
+    <div class="filtros">
+      <label>De
+        <input id="f-de" type="date">
+      </label>
+
+      <label>Até
+        <input id="f-ate" type="date">
+      </label>
+
+      <div class="atalhos">
+        <button class="btn sec" type="button" data-atalho="0">Hoje</button>
+        <button class="btn sec" type="button" data-atalho="7">7 dias</button>
+        <button class="btn sec" type="button" data-atalho="30">30 dias</button>
+        <button class="btn sec" type="button" data-atalho="mes">Este mês</button>
+      </div>
+    </div>
+
+    <p id="erro" class="erro" hidden></p>
+
+    <h2 class="secao">Vendas no período</h2>
+    <section id="cartoes-vendas" class="cartoes-dash"></section>
+
+    <article class="caixa">
+      <div class="caixa-titulo">
+        <h2>Vendas por dia</h2>
+        <button class="btn sec mini" type="button" data-csv="dias">Exportar CSV</button>
+      </div>
+      <div id="grafico-dias"></div>
+    </article>
+
+    <section class="grade-duas">
+      <article class="caixa">
+        <div class="caixa-titulo">
+          <h2>Por forma de pagamento</h2>
+          <button class="btn sec mini" type="button" data-csv="forma">Exportar CSV</button>
+        </div>
+        <table>
+          <thead><tr><th>Forma</th><th class="num">Vendas</th><th class="num">Total</th></tr></thead>
+          <tbody id="t-forma"></tbody>
+        </table>
+      </article>
+
+      <article class="caixa">
+        <div class="caixa-titulo">
+          <h2>Por vendedor</h2>
+          <button class="btn sec mini" type="button" data-csv="vendedor">Exportar CSV</button>
+        </div>
+        <table>
+          <thead><tr><th>Vendedor</th><th class="num">Vendas</th><th class="num">Total</th></tr></thead>
+          <tbody id="t-vendedor"></tbody>
+        </table>
+      </article>
+
+      <article class="caixa">
+        <div class="caixa-titulo">
+          <h2>Por categoria</h2>
+          <button class="btn sec mini" type="button" data-csv="categoria">Exportar CSV</button>
+        </div>
+        <table>
+          <thead><tr><th>Categoria</th><th class="num">Unidades</th><th class="num">Faturamento</th></tr></thead>
+          <tbody id="t-categoria"></tbody>
+        </table>
+      </article>
+
+      <article class="caixa">
+        <div class="caixa-titulo">
+          <h2>Mais vendidos (top 10)</h2>
+          <button class="btn sec mini" type="button" data-csv="produtos">Exportar CSV</button>
+        </div>
+        <table>
+          <thead><tr><th>Medicamento</th><th class="num">Unidades</th><th class="num">Faturamento</th></tr></thead>
+          <tbody id="t-produtos"></tbody>
+        </table>
+      </article>
+    </section>
+
+    <h2 class="secao">Posição do estoque (hoje)</h2>
+    <section id="cartoes-estoque" class="cartoes-dash"></section>
+    <p class="nota">Os valores usam o <strong>preço de venda</strong>. O sistema ainda não guarda o preço
+      de custo, por isso não calcula lucro. As perdas seguem o período escolhido acima e usam o preço atual.</p>
+  </main>
+
+  <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/gestao-relatorios.js"></script>
+</body>
+</html>
