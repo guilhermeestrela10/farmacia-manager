@@ -65,7 +65,7 @@ public class MedicamentoService {
 
     @Transactional
     public MedicamentoResponse atualizar(Long id, MedicamentoRequest request) {
-        Medicamento medicamento = buscarEntidade(id);
+        Medicamento medicamento = buscarEntidadeComTravamento(id);
         String codigoBarras = normalizarCodigo(request.codigoBarras());
 
         if (codigoBarras != null
@@ -101,14 +101,14 @@ public class MedicamentoService {
 
     @Transactional
     public MedicamentoResponse desativar(Long id) {
-        Medicamento medicamento = buscarEntidade(id);
+        Medicamento medicamento = buscarEntidadeComTravamento(id);
         medicamento.desativar();
         return toResponse(medicamento);
     }
 
     @Transactional
     public MedicamentoResponse ativar(Long id) {
-        Medicamento medicamento = buscarEntidade(id);
+        Medicamento medicamento = buscarEntidadeComTravamento(id);
         medicamento.ativar();
         return toResponse(medicamento);
     }
@@ -167,6 +167,12 @@ public class MedicamentoService {
             case GENERICO -> "Genérico";
             case SIMILAR -> "Similar";
         };
+    }
+
+    private Medicamento buscarEntidadeComTravamento(Long id) {
+        return medicamentoRepository.buscarPorIdComTravamento(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Medicamento não encontrado."));
     }
 
     private Medicamento buscarEntidade(Long id) {

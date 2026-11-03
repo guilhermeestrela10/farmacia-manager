@@ -15,7 +15,9 @@ public interface MovimentacaoEstoqueRepository
         extends JpaRepository<MovimentacaoEstoque, Long>,
         JpaSpecificationExecutor<MovimentacaoEstoque> {
 
-    List<MovimentacaoEstoque> findByVendaIdAndTipo(Long vendaId, TipoMovimentacao tipo);
+    @Query("select m from MovimentacaoEstoque m where m.vendaId = :vendaId and m.tipo = :tipo "
+            + "order by m.lote.validade, m.lote.id, m.id")
+    List<MovimentacaoEstoque> findByVendaIdAndTipo(@Param("vendaId") Long vendaId, @Param("tipo") TipoMovimentacao tipo);
 
     @Query("select sum(m.quantidade), sum(m.quantidade * m.lote.medicamento.preco) "
             + "from MovimentacaoEstoque m "

@@ -14,10 +14,14 @@ class MigracoesSegurancaTest {
         assumeTrue(url.matches("jdbc:postgresql://127\\.0\\.0\\.1:55432/postgres"));
         String schema = "seguranca_" + java.util.UUID.randomUUID().toString().replace("-", "");
         var flyway = Flyway.configure().dataSource(url, "farmacia_teste", "").schemas(schema).defaultSchema(schema).load();
-        assertEquals(8, flyway.migrate().migrationsExecuted);
+        assertEquals(9, flyway.migrate().migrationsExecuted);
         flyway.validate();
         try (var c = DriverManager.getConnection(url, "farmacia_teste", ""); var s = c.createStatement()) {
             c.setSchema(schema);
+            s.executeUpdate("INSERT INTO categoria (nome) VALUES ('Categoria fictícia')");
+            assertThrows(SQLException.class, () -> s.executeUpdate("INSERT INTO categoria (nome) VALUES ('CATEGORIA FICTÍCIA')"));
+            s.executeUpdate("INSERT INTO fabricante (nome) VALUES ('Fabricante fictício')");
+            assertThrows(SQLException.class, () -> s.executeUpdate("INSERT INTO fabricante (nome) VALUES ('FABRICANTE FICTÍCIO')"));
             s.executeUpdate("INSERT INTO auditoria (tipo, usuario, acao, metodo, caminho, status, ip) VALUES ('ACESSO','ficticio','Login','POST','/login',200,'127.0.0.1')");
             for (String sql : new String[]{"UPDATE auditoria SET acao='Alterada'", "DELETE FROM auditoria", "TRUNCATE auditoria"}) {
                 assertThrows(SQLException.class, () -> s.executeUpdate(sql));

@@ -4,6 +4,8 @@ let saldoAtual = null;
 let operacao = null;
 let loteAtual = null;
 let temporizadorAviso;
+let versaoCarga = 0;
+let salvando = false;
 
 const TEXTOS = {
   entrada: { titulo: "Entrada de estoque", botao: "Registrar entrada" },
@@ -84,13 +86,7 @@ async function aoEscolher() {
   const id = Number($("medicamento").value);
   medicamentoAtual = medicamentos.find((m) => m.id === id) || null;
 
-  const escolhido = medicamentoAtual !== null;
-  $("btn-entrada").disabled = !escolhido;
-  $("btn-saida").disabled = !escolhido;
-  $("cartoes").hidden = !escolhido;
-  $("area-lotes").hidden = !escolhido;
-
-  if (escolhido) await carregarEstoque();
+  await carregarEstoque();
 }
 
 /* ---------- Números e lotes ---------- */
@@ -159,19 +155,34 @@ function renderLotes(lotes) {
 }
 
 async function carregarEstoque() {
+  const versao = ++versaoCarga;
+  const medicamento = medicamentoAtual;
+  saldoAtual = null;
+  loteAtual = null;
+  $("btn-entrada").disabled = true;
+  $("btn-saida").disabled = true;
+  $("cartoes").hidden = true;
+  $("area-lotes").hidden = true;
+  $("corpo").replaceChildren();
   limparErro();
+  if (!medicamento) return;
 
   try {
     const [saldo, lotes] = await Promise.all([
-      requisitar("/estoque/medicamentos/" + medicamentoAtual.id + "/saldo"),
-      requisitar("/estoque/medicamentos/" + medicamentoAtual.id + "/lotes"),
+      requisitar("/estoque/medicamentos/" + medicamento.id + "/saldo"),
+      requisitar("/estoque/medicamentos/" + medicamento.id + "/lotes"),
     ]);
 
+    if (versao !== versaoCarga) return;
     saldoAtual = saldo;
     renderCartoes(saldo);
     renderLotes(lotes);
+    $("btn-entrada").disabled = false;
+    $("btn-saida").disabled = false;
+    $("cartoes").hidden = false;
+    $("area-lotes").hidden = false;
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoCarga) mostrarErro(erro.message);
   }
 }
 
@@ -195,6 +206,7 @@ function atualizarLimite() {
 }
 
 function abrirOperacao(tipo, lote) {
+  if (!medicamentoAtual || !saldoAtual) return;
   operacao = tipo;
   loteAtual = lote || null;
 
@@ -255,6 +267,7 @@ function mensagemDeSucesso(resposta) {
 
 async function salvar(evento) {
   evento.preventDefault();
+  if (salvando) return;
 
   const quantidade = Number($("quantidade").value);
   const responsavel = $("responsavel").value.trim();
@@ -301,6 +314,7 @@ async function salvar(evento) {
   }
 
   const botao = $("confirmar");
+  salvando = true;
   botao.disabled = true;
 
   try {
@@ -313,6 +327,7 @@ async function salvar(evento) {
     $("erro-form").textContent = erro.message;
     $("erro-form").hidden = false;
   } finally {
+    salvando = false;
     botao.disabled = false;
   }
 }

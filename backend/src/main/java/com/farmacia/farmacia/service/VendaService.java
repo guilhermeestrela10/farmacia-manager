@@ -115,7 +115,7 @@ public class VendaService {
         Venda venda = new Venda(vendedor, request.formaPagamento());
 
         for (Map.Entry<Long, Integer> pedido : pedidos.entrySet()) {
-            Medicamento medicamento = medicamentoRepository.findById(pedido.getKey())
+            Medicamento medicamento = medicamentoRepository.buscarPorIdComTravamento(pedido.getKey())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.UNPROCESSABLE_ENTITY, "Medicamento não encontrado."));
 
@@ -124,9 +124,20 @@ public class VendaService {
                         "Medicamento desativado: " + medicamento.getNome() + ".");
             }
 
+            boolean precoMudou = request.itens().stream().anyMatch(item ->
+                    item.medicamentoId().equals(medicamento.getId()) && item.precoEsperado() != null
+                            && item.precoEsperado().compareTo(medicamento.getPreco()) != 0);
+            if (precoMudou) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "O preço de " + medicamento.getNome()
+                                + " mudou. Remova o item e adicione novamente para confirmar o novo valor.");
+            }
             venda.adicionarItem(medicamento, pedido.getValue(), medicamento.getPreco());
         }
 
+        if (venda.getTotal().compareTo(new BigDecimal("9999999999.99")) > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "O total da venda excede o limite permitido.");
+        }
         vendaRepository.save(venda);
         baixarEstoque(venda, vendedor);
 
@@ -140,7 +151,7 @@ public class VendaService {
             Medicamento medicamento = item.getMedicamento();
 
             List<Lote> lotes = loteRepository.buscarDisponiveisParaSaida(medicamento.getId(), hoje);
-            int disponivel = lotes.stream().mapToInt(Lote::getQuantidadeAtual).sum();
+            long disponivel = lotes.stream().mapToLong(Lote::getQuantidadeAtual).sum();
 
             if (disponivel < item.getQuantidade()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,

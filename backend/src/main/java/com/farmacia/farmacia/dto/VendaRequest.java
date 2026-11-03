@@ -12,8 +12,7 @@ import jakarta.validation.constraints.Size;
 public record VendaRequest(
         @NotEmpty(message = "A venda precisa ter ao menos um item.")
         @Size(max = 50, message = "Uma venda pode ter no máximo 50 itens.")
-        @Valid
-        List<ItemVendaRequest> itens,
+        List<@NotNull(message = "Os itens da venda não podem ser nulos.") @Valid ItemVendaRequest> itens,
 
         @NotNull(message = "A forma de pagamento é obrigatória.")
         FormaPagamento formaPagamento

@@ -4,6 +4,7 @@ let medicamentos = [];
 let editandoId = null;
 let esperaBusca;
 let temporizadorAviso;
+let salvando = false;
 
 const TIPOS = {
   REFERENCIA: ["Referência", "neutro"],
@@ -156,6 +157,10 @@ function abrirFormulario(med) {
 
 async function salvar(evento) {
   evento.preventDefault();
+  if (salvando) return;
+  salvando = true;
+  const botao = $("formulario").querySelector('button[type="submit"]');
+  botao.disabled = true;
 
   const dados = {
     nome: $("nome").value.trim(),
@@ -180,6 +185,9 @@ async function salvar(evento) {
   } catch (erro) {
     $("erro-form").textContent = erro.message;
     $("erro-form").hidden = false;
+  } finally {
+    salvando = false;
+    botao.disabled = false;
   }
 }
 

@@ -11,9 +11,21 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> tratarConflitoDeDados(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(409).body(Map.of("mensagem",
+                "Dados em conflito com outro cadastro ou operação. Atualize a página e confira os valores."));
+    }
+
+    @ExceptionHandler(ArithmeticException.class)
+    public ResponseEntity<Map<String, String>> tratarLimiteNumerico(ArithmeticException ex) {
+        return ResponseEntity.badRequest().body(Map.of("mensagem", "Valor ou quantidade excede o limite permitido."));
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, String>> tratarErroDeNegocio(ResponseStatusException ex) {

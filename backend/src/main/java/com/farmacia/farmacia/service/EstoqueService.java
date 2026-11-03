@@ -80,7 +80,7 @@ public class EstoqueService {
         List<Lote> lotes = loteRepository
                 .buscarDisponiveisParaSaida(medicamento.getId(), LocalDate.now());
 
-        int disponivel = lotes.stream().mapToInt(Lote::getQuantidadeAtual).sum();
+        long disponivel = lotes.stream().mapToLong(Lote::getQuantidadeAtual).sum();
         int pedido = request.quantidade();
 
         if (disponivel < pedido) {
@@ -127,6 +127,10 @@ public class EstoqueService {
         Lote lote = buscarLoteComTravamento(request.loteId());
         int quantidade = request.quantidade();
 
+        if (tipo == TipoMovimentacao.AJUSTE_SAIDA && lote.getValidade().isBefore(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Lote vencido só pode ser baixado por perda.");
+        }
         if (tipo == TipoMovimentacao.AJUSTE_ENTRADA) {
             lote.adicionar(quantidade);
         } else {
@@ -254,7 +258,7 @@ public class EstoqueService {
     }
 
     private Medicamento buscarMedicamentoAtivo(Long id) {
-        Medicamento medicamento = medicamentoRepository.findById(id)
+        Medicamento medicamento = medicamentoRepository.buscarPorIdComTravamento(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNPROCESSABLE_ENTITY, "Medicamento não encontrado."));
 
