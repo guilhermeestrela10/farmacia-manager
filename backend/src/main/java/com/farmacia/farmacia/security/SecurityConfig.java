@@ -1,6 +1,7 @@
 package com.farmacia.farmacia.security;
 
 import com.farmacia.farmacia.repository.UsuarioRepository;
+import com.farmacia.farmacia.service.AuditoriaService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +27,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filtros(HttpSecurity http, UsuarioRepository usuarios)
-            throws Exception {
+    public SecurityFilterChain filtros(HttpSecurity http,
+                                       UsuarioRepository usuarios,
+                                       TentativasDeLogin tentativas,
+                                       AuditoriaService auditoria,
+                                       AuditoriaDeAcessos acessos) throws Exception {
 
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
         csrfHandler.setCsrfRequestAttributeName(null);
@@ -47,15 +51,38 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login.html")
                         .loginProcessingUrl("/login")
-                        .successHandler((req, res, auth) ->
-                                res.setStatus(HttpServletResponse.SC_OK))
-                        .failureHandler((req, res, ex) ->
+                        .successHandler((req, res, auth) -> {
+                            tentativas.limpar(auth.getName());
+                            acessos.registrar(req, auth.getName(), "Login", 200);
+                            // Guardar a versão autenticada permite derrubar esta sessão
+                            // se a senha for trocada depois.
+                            req.getSession().setAttribute(
+                                    UsuarioAtivoFilter.ATRIBUTO_LOGIN,
+                                    ((UsuarioAutenticado) auth.getPrincipal()).getVersaoSenha());
+                            res.setStatus(HttpServletResponse.SC_OK);
+                        })
+                        .failureHandler((req, res, ex) -> {
+                            String login = req.getParameter("username");
+                            tentativas.registrarFalha(login);
+                            boolean bloqueado = tentativas.bloqueado(login);
+                            acessos.registrar(req, login, bloqueado ? "Login bloqueado" : "Falha de login",
+                                    bloqueado ? 429 : 401);
+                            // A mesma resposta vale para usuários que existem e que não existem.
+                            if (tentativas.bloqueado(req.getParameter("username"))) {
+                                escreverErro(res, 429,
+                                        "Muitas tentativas. Aguarde alguns minutos e tente de novo.");
+                            } else {
                                 escreverErro(res, HttpServletResponse.SC_UNAUTHORIZED,
-                                        "Usuário ou senha inválidos."))
+                                        "Usuário ou senha inválidos.");
+                            }
+                        })
                         .permitAll())
 
                 .logout(logout -> logout
                         .logoutUrl("/logout")
+                        .addLogoutHandler((req, res, auth) -> {
+                            if (auth != null) acessos.registrar(req, auth.getName(), "Logout", 200);
+                        })
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
                         .deleteCookies("JSESSIONID"))
 
@@ -80,7 +107,8 @@ public class SecurityConfig {
                             }
                         }))
 
-                .addFilterAfter(new UsuarioAtivoFilter(usuarios), SecurityContextHolderFilter.class);
+                .addFilterAfter(new UsuarioAtivoFilter(usuarios), SecurityContextHolderFilter.class)
+                .addFilterAfter(new AuditoriaFilter(auditoria), UsuarioAtivoFilter.class);
 
         return http.build();
     }

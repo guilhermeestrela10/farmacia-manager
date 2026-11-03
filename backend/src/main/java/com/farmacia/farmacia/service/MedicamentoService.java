@@ -10,6 +10,7 @@ import com.farmacia.farmacia.repository.CategoriaRepository;
 import com.farmacia.farmacia.repository.FabricanteRepository;
 import com.farmacia.farmacia.repository.MedicamentoRepository;
 import java.text.Normalizer;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class MedicamentoService {
@@ -24,13 +28,16 @@ public class MedicamentoService {
     private final MedicamentoRepository medicamentoRepository;
     private final CategoriaRepository categoriaRepository;
     private final FabricanteRepository fabricanteRepository;
+    private final AuditoriaService auditoria;
 
     public MedicamentoService(MedicamentoRepository medicamentoRepository,
                               CategoriaRepository categoriaRepository,
-                              FabricanteRepository fabricanteRepository) {
+                              FabricanteRepository fabricanteRepository,
+                              AuditoriaService auditoria) {
         this.medicamentoRepository = medicamentoRepository;
         this.categoriaRepository = categoriaRepository;
         this.fabricanteRepository = fabricanteRepository;
+        this.auditoria = auditoria;
     }
 
     @Transactional
@@ -69,6 +76,7 @@ public class MedicamentoService {
         Categoria categoria = buscarCategoria(request.categoriaId());
         Fabricante fabricante = buscarFabricante(request.fabricanteId());
 
+        BigDecimal precoAnterior = medicamento.getPreco();
         medicamento.atualizar(
                 request.nome().trim(),
                 codigoBarras,
@@ -78,6 +86,16 @@ public class MedicamentoService {
                 request.preco(),
                 request.estoqueMinimo());
 
+        if (precoAnterior.compareTo(request.preco()) != 0) {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            var atributos = RequestContextHolder.getRequestAttributes();
+            String ip = atributos instanceof ServletRequestAttributes servlet
+                    ? servlet.getRequest().getRemoteAddr() : "";
+            auditoria.registrarPreco(auth == null ? "sistema" : auth.getName(),
+                    "Preço do medicamento #" + id + ": " + precoAnterior.toPlainString()
+                            + " → " + request.preco().toPlainString(),
+                    "/medicamentos/" + id, ip);
+        }
         return toResponse(medicamento);
     }
 
