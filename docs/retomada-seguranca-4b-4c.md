@@ -2,7 +2,8 @@
 
 Pasta: `C:\Users\guilh\projetos\farmacia-manager`.
 Branch de trabalho: `codex/corrigir-seguranca-4b-4c`.
-As alterações locais anteriores foram preservadas. Nenhum commit ou push foi feito.
+Este documento registra o diagnóstico inicial. As alterações locais anteriores foram preservadas.
+Depois, o usuário autorizou commits e push; o resultado atualizado está em `correcoes-revisao-projeto.md`.
 A branch `wip-seguranca-4b-4c` não estava disponível localmente nem no GitHub.
 
 ## Diagnóstico inicial
