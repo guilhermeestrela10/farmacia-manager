@@ -63,6 +63,8 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponse desativar(Long id, String loginLogado) {
+        // A decisão sobre o último administrador exige a mesma ordem de bloqueios entre requisições.
+        repository.buscarAdministradoresAtivosComTravamento();
         Usuario usuario = buscar(id);
 
         if (usuario.getLogin().equals(loginLogado)) {
@@ -113,7 +115,7 @@ public class UsuarioService {
                     "Muitas tentativas. Aguarde alguns minutos e tente de novo.");
         }
 
-        Usuario usuario = repository.findByLogin(login)
+        Usuario usuario = repository.buscarPorLoginComTravamento(login)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, "Sessão inválida. Entre novamente."));
 
@@ -152,7 +154,7 @@ public class UsuarioService {
     }
 
     private Usuario buscar(Long id) {
-        return repository.findById(id)
+        return repository.buscarPorIdComTravamento(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Usuário não encontrado."));
     }
