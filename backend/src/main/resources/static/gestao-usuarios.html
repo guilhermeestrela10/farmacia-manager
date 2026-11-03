@@ -20,16 +20,16 @@
         <h2>Administrador</h2>
         <ul>
           <li>Acessa tudo, inclusive a Gestão.</li>
-          <li>Cria, desativa e reativa usuários.</li>
-          <li>Relatórios e auditoria (em breve).</li>
+          <li>Cria, desativa e reativa usuários e redefine senhas.</li>
+          <li>Relatórios e auditoria.</li>
         </ul>
       </article>
       <article class="caixa">
         <h2>Vendedor</h2>
         <ul>
           <li>Acessa tudo, menos a Gestão.</li>
-          <li>Dashboard, medicamentos, estoque e movimentações.</li>
-          <li>Vendas (em breve).</li>
+          <li>Dashboard, vendas, medicamentos, estoque e movimentações.</li>
+          <li>Troca a própria senha clicando no nome, no topo.</li>
         </ul>
       </article>
     </section>
@@ -67,7 +67,7 @@
                placeholder="ex.: maria.silva">
       </label>
 
-      <label class="campo">Senha
+      <label class="campo">Senha provisória
         <input id="senha" type="password" minlength="8" maxlength="72"
                autocomplete="new-password" required>
       </label>
@@ -84,13 +84,42 @@
       </label>
 
       <p class="nota">Login: de 3 a 50 caracteres (letras, números, ponto, hífen ou sublinhado).
-        Senha: no mínimo 8 caracteres.</p>
+        Senha: no mínimo 8 caracteres. Peça para a pessoa trocar a senha no primeiro acesso.</p>
 
       <p id="erro-form" class="erro" hidden></p>
 
       <div class="rodape-form">
         <button id="cancelar" class="btn sec" type="button">Cancelar</button>
         <button id="salvar" class="btn" type="submit">Criar usuário</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="janela-senha">
+    <form id="form-senha">
+      <h2 id="titulo-senha">Redefinir senha</h2>
+
+      <p class="nota">A pessoa é desconectada na hora e entra de novo com a nova senha.
+        Combine a senha por um canal seguro e peça para ela trocá-la em seguida, clicando no próprio
+        nome, no topo da tela.</p>
+
+      <p id="aviso-propria" class="aviso" hidden>Esta é a sua própria senha: você será desconectado
+        e entrará de novo com a nova senha.</p>
+
+      <label class="campo">Nova senha
+        <input id="nova-senha" type="password" minlength="8" maxlength="72"
+               autocomplete="new-password" required>
+      </label>
+
+      <label class="campo-check">
+        <input id="ver-nova-senha" type="checkbox"> Mostrar senha
+      </label>
+
+      <p id="erro-senha" class="erro" hidden></p>
+
+      <div class="rodape-form">
+        <button id="cancelar-senha" class="btn sec" type="button">Cancelar</button>
+        <button id="salvar-senha" class="btn" type="submit">Redefinir senha</button>
       </div>
     </form>
   </dialog>

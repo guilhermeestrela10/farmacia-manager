@@ -3,6 +3,7 @@ package com.farmacia.farmacia.security;
 import com.farmacia.farmacia.model.Perfil;
 import com.farmacia.farmacia.model.Usuario;
 import com.farmacia.farmacia.repository.UsuarioRepository;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,18 +42,24 @@ public class AdminInicial implements ApplicationRunner {
             return;
         }
 
-        if (login.isBlank() || senha.length() < 8) {
-            log.warn("Nenhum usuário cadastrado. Defina app.admin.login e app.admin.senha "
-                    + "(mínimo 8 caracteres) no application-local.properties.");
+        String loginNormalizado = login.trim().toLowerCase(Locale.ROOT);
+        String nomeNormalizado = nome.trim();
+        if (!loginNormalizado.matches("[a-z0-9._-]{3,50}")
+                || nomeNormalizado.isBlank() || nomeNormalizado.length() > 100
+                || senha.isBlank() || senha.length() < 8 || senha.length() > 72
+                || senha.getBytes(StandardCharsets.UTF_8).length > 72) {
+            log.warn("Nenhum usuário cadastrado. Configure app.admin.nome (1 a 100 caracteres), "
+                    + "app.admin.login (3 a 50: letras, números, ponto, hífen ou sublinhado) "
+                    + "e app.admin.senha (8 a 72 caracteres e até 72 bytes).");
             return;
         }
 
         repository.save(new Usuario(
-                nome.trim(),
-                login.trim().toLowerCase(Locale.ROOT),
+                nomeNormalizado,
+                loginNormalizado,
                 encoder.encode(senha),
                 Perfil.ADMIN));
 
-        log.info("Administrador inicial criado: {}", login.trim().toLowerCase(Locale.ROOT));
+        log.info("Administrador inicial criado: {}", loginNormalizado);
     }
 }

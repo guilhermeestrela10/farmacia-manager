@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.farmacia.farmacia.model.TipoMedicamento;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -29,6 +30,7 @@ public record MedicamentoRequest(
 
         @NotNull(message = "O preço é obrigatório.")
         @Positive(message = "O preço deve ser maior que zero.")
+        @Digits(integer = 8, fraction = 2, message = "O preço deve ter no máximo 8 dígitos inteiros e 2 casas decimais.")
         BigDecimal preco,
 
         @NotNull(message = "O estoque mínimo é obrigatório.")

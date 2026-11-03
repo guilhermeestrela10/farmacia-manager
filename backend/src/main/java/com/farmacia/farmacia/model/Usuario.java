@@ -38,6 +38,9 @@ public class Usuario {
     @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm;
 
+    @Column(name = "senha_alterada_em")
+    private Instant senhaAlteradaEm;
+
     protected Usuario() {
         // exigido pelo JPA
     }
@@ -57,6 +60,11 @@ public class Usuario {
 
     public void desativar() {
         this.ativo = false;
+    }
+
+    public void definirSenha(String novoHash) {
+        this.senhaHash = novoHash;
+        this.senhaAlteradaEm = Instant.now();
     }
 
     public Long getId() {
@@ -86,4 +94,8 @@ public class Usuario {
     public Instant getCriadoEm() {
         return criadoEm;
     }
-}   
+
+    public Instant getSenhaAlteradaEm() {
+        return senhaAlteradaEm;
+    }
+}

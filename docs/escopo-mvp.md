@@ -1,108 +1,53 @@
-# Escopo do MVP (Versão 0.1)
+# Escopo do MVP — atualizado em 03/11/2026
 
-> Documento vivo. Será atualizado conforme o projeto evoluir e conforme o feedback dos farmacêuticos.
+O sistema atende ao cadastro de medicamentos, estoque e vendas de uma farmácia, com dados fictícios durante a validação. A identidade visual segue as Farmácias Ruanna.
 
-## 1. Objetivo da versão 0.1
+## Implementado
 
-Entregar um sistema web pequeno e funcional que controle **medicamentos e estoque**, com lote e validade, para ser demonstrado a farmacêuticos e validar a base do projeto.
+- [x] Categorias e fabricantes com nomes únicos, sem diferenciar maiúsculas conforme a configuração regional do banco.
+- [x] Medicamentos de referência, genéricos e similares; busca por nome, código, categoria, fabricante e tipo.
+- [x] Edição e desativação de medicamentos, preservando o histórico.
+- [x] Estoque por lote, validade e estoque mínimo; entrada, saída, ajuste, perda e histórico.
+- [x] Baixa FEFO e bloqueio de venda/saída de lotes vencidos.
+- [x] Alertas de estoque baixo, sem estoque, vencidos e próximos do vencimento.
+- [x] Vendas, carrinho, pagamento, cálculo de troco, recibo e leitor de código de barras via Enter.
+- [x] Histórico de vendas, totais por pagamento e cancelamento por administrador.
+- [x] Relatórios de vendas, posição do estoque e exportação CSV. Não há cálculo de lucro porque não existe preço de custo.
+- [x] Login, perfis ADMIN/VENDEDOR, administração de usuários e troca/redefinição de senha.
+- [x] Auditoria de acessos, alterações e preços; bloqueio temporário de tentativas de login.
+- [x] Dashboard com gráficos e menu por seções.
+- [x] Testes automatizados de segurança, estoque, vendas, concorrência, migrações e estados assíncronos das telas.
 
-## 2. Decisões já tomadas
+## Regras preservadas
 
-| Tema | Decisão |
-|---|---|
-| Banco de dados | PostgreSQL (administração via pgAdmin 4) |
-| Backend | Java 21 + Spring Boot 3 |
-| Persistência | Spring Data JPA + Flyway (migrações) |
-| Frontend | HTML, CSS e JavaScript puro |
-| Arquitetura | Monólito em camadas (controller, service, repository) |
-| Medicamentos controlados (tarja preta) | **Fora do escopo** do projeto |
-| Dados | Apenas dados fictícios durante o desenvolvimento |
+1. Toda alteração de saldo gera movimentação. Erros são corrigidos com ajustes; histórico não é apagado pela aplicação.
+2. Medicamento é desativado, nunca excluído. Desativado não recebe entrada, saída ou venda.
+3. Lote é único por medicamento e número; novas entradas devem manter sua validade.
+4. Estoque disponível considera lotes dentro da validade; lotes vencidos só podem ser baixados por perda.
+5. Venda usa o preço do cadastro, grava o valor no item e confirma todos os itens ou reverte tudo.
+6. Se o preço mudou desde a confirmação na tela, a venda é recusada e o usuário precisa confirmar o novo valor.
+7. Cancelamento exige ADMIN e motivo; só ocorre uma vez e devolve as unidades aos mesmos lotes.
+8. Só vendas concluídas entram nos totais dos relatórios.
+9. Vendedor acessa a operação e suas próprias vendas, sem acesso às rotas de Gestão.
+10. Auditoria não registra senhas, corpo de formulário ou query string; o banco impede UPDATE, DELETE e TRUNCATE dos registros.
+11. Alterações simultâneas de usuário não podem restaurar senhas antigas, reativar desativados ou eliminar o último administrador ativo.
 
-## 3. Faz parte do MVP
+## Fora do escopo atual
 
-### Medicamentos
-- [ ] Cadastrar medicamento
-- [ ] Listar medicamentos
-- [ ] Pesquisar por nome
-- [ ] Editar medicamento
-- [ ] Desativar medicamento (não excluir)
-- [ ] Categorias e fabricantes (cadastro simples)
+Medicamentos controlados (tarja preta), emissão de NFC-e, múltiplas filiais, clientes, atendimento farmacêutico, receitas e dispensações. As últimas telas continuam identificadas como planejadas no menu.
 
-### Estoque
-- [ ] Registrar **entrada** (com lote e validade)
-- [ ] Registrar **saída**
-- [ ] Consultar quantidade disponível (total e por lote)
-- [ ] Definir estoque mínimo por medicamento
-- [ ] Histórico de movimentações
+## Validações de produto ainda necessárias
 
-### Alertas básicos
-- [ ] Estoque baixo
-- [ ] Sem estoque
-- [ ] Lotes próximos do vencimento
+- Regras de antibióticos e controle de receita.
+- Necessidade de emissão fiscal.
+- Preço de custo, margem e permissões para alterar preço ou corrigir estoque.
+- Prazo de cancelamento de venda e de retenção da auditoria.
+- Fracionamento e unidade de controle de estoque.
+- Categorias desejadas e antecedência dos alertas de validade.
+- Demonstração completa com a farmacêutica, usando dados fictícios.
 
-### Interface
-- [ ] Telas simples para as funcionalidades acima
-- [ ] Mensagens de erro claras
+## Base técnica
 
-## 4. Fica fora do MVP
+Java 21, Spring Boot 4.1.1, PostgreSQL 18, Spring Data JPA, Spring Security, Bean Validation e Flyway. Frontend HTML/CSS/JavaScript puro. O esquema vigente é definido por `backend/src/main/resources/db/migration`, atualmente V1–V9; `modelo-banco.sql` é uma referência histórica.
 
-- Clientes, atendimento, receitas e dispensação (versões 0.2 a 0.5)
-- Login, usuários e permissões (versão 0.6)
-- Dashboard completo e gráficos (versão 0.7)
-- Relatórios (versão 0.8)
-- Auditoria completa, backup automático e logs avançados (versão 0.9)
-- Venda/caixa
-- Múltiplas filiais
-- Leitor de código de barras
-- Hospedagem
-
-> **Observação:** a movimentação de estoque já terá um campo de "responsável", preenchido de forma provisória, para evitar refazer a tabela quando o login for implementado.
-
-## 5. Regras de negócio iniciais
-
-1. Nome, preço (maior que zero) e estoque mínimo (maior ou igual a zero) são obrigatórios.
-2. Um medicamento pode ter vários lotes, cada um com sua validade.
-3. O número do lote é único dentro do mesmo medicamento.
-4. O estoque nunca fica negativo.
-5. Toda alteração de saldo gera uma movimentação registrada.
-6. Movimentações não são editadas nem apagadas; erros são corrigidos com um **ajuste**.
-7. Medicamento com histórico é **desativado**, nunca excluído.
-8. Lote vencido não pode ter saída para dispensação.
-9. Alerta de estoque baixo: saldo total menor ou igual ao estoque mínimo.
-10. Alerta de vencimento: lote que vence em até N dias (valor inicial sugerido: 90, configurável).
-11. Saída consome primeiro o lote de validade mais próxima (FEFO). **A validar com farmacêuticos.**
-
-## 6. Modelo inicial do banco (rascunho)
-
-```
-categoria (id, nome)
-fabricante (id, nome)
-medicamento (id, nome, codigo_barras, categoria_id, fabricante_id,
-             preco, estoque_minimo, ativo, criado_em)
-lote (id, medicamento_id, numero_lote, validade, quantidade_atual, criado_em)
-movimentacao_estoque (id, lote_id, tipo, quantidade, motivo,
-                      responsavel, data_hora, observacao)
-```
-
-Tipos de movimentação: `ENTRADA`, `SAIDA`, `AJUSTE`, `PERDA`.
-
-## 7. Dúvidas em aberto (para responder ou levar aos farmacêuticos)
-
-- [ ] O estoque é controlado por caixa, cartela ou unidade? Existe fracionamento?
-- [ ] O preço é único ou precisa de histórico?
-- [ ] Como funciona a baixa por lote na prática? O FEFO é seguido?
-- [ ] Qual antecedência de alerta de vencimento é útil (30, 60, 90 dias)?
-- [ ] O código de barras é usado no dia a dia?
-- [ ] Quais informações são consultadas com mais frequência?
-- [ ] Quais tarefas são mais repetitivas hoje?
-
-## 8. Critério de "pronto" da versão 0.1
-
-A versão 0.1 está pronta quando for possível, com dados fictícios:
-
-1. Cadastrar um medicamento.
-2. Dar entrada de dois lotes com validades diferentes.
-3. Dar saída e ver o saldo atualizado.
-4. Ver o alerta de estoque baixo e de vencimento próximo.
-5. Consultar o histórico de movimentações.
-6. Tentar uma saída maior que o saldo e receber uma mensagem de erro clara.
+O bloqueio de login em memória, a busca em Java, a configuração de HTTPS/backup e a hospedagem continuam como limites e próximos trabalhos. Veja o README para executar a aplicação e a suíte completa.

@@ -1,6 +1,7 @@
 package com.farmacia.farmacia.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.farmacia.farmacia.dto.SenhaRequest;
 import com.farmacia.farmacia.dto.UsuarioRequest;
 import com.farmacia.farmacia.dto.UsuarioResponse;
 import com.farmacia.farmacia.service.UsuarioService;
@@ -48,5 +50,12 @@ public class UsuarioController {
     @PatchMapping("/{id}/ativar")
     public UsuarioResponse ativar(@PathVariable Long id) {
         return service.ativar(id);
+    }
+
+    @PostMapping("/{id}/senha")
+    public Map<String, String> redefinirSenha(@PathVariable Long id,
+                                              @Valid @RequestBody SenhaRequest request) {
+        service.redefinirSenha(id, request.senha());
+        return Map.of("mensagem", "Senha redefinida.");
     }
 }

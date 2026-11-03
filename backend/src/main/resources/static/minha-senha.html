@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alterar minha senha | Farmácias Ruanna</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/extras.css" />
+  </head>
+  <body class="com-layout" data-pagina="minha-senha">
+    <main>
+      <header class="topo">
+        <h1>Alterar minha senha</h1>
+      </header>
+
+      <article class="caixa" style="max-width: 460px">
+        <form id="formulario">
+          <label class="campo"
+            >Senha atual
+            <input
+              id="atual"
+              type="password"
+              maxlength="72"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+
+          <label class="campo"
+            >Nova senha
+            <input
+              id="nova"
+              type="password"
+              minlength="8"
+              maxlength="72"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+
+          <label class="campo"
+            >Repita a nova senha
+            <input
+              id="confirmar"
+              type="password"
+              minlength="8"
+              maxlength="72"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+
+          <label class="campo-check">
+            <input id="ver-senhas" type="checkbox" /> Mostrar senhas
+          </label>
+
+          <p class="nota">
+            A senha deve ter no mínimo 8 caracteres. Uma frase longa é mais
+            segura do que uma senha curta e complicada. Ao trocar, você sai do
+            sistema e entra de novo com a nova senha.
+          </p>
+
+          <p id="erro" class="erro" hidden></p>
+
+          <button id="trocar" class="btn" type="submit">Trocar senha</button>
+        </form>
+
+        <p id="sucesso" class="aviso" hidden>
+          Senha alterada. Você vai voltar para a tela de entrada...
+        </p>
+      </article>
+    </main>
+
+    <script src="js/comum.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/minha-senha.js"></script>
+  </body>
+</html>

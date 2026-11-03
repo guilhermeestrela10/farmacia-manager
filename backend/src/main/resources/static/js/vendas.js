@@ -128,6 +128,7 @@ async function carregarCategorias() {
 /* ---------- Carrinho ---------- */
 
 function adicionar(produto) {
+  if (enviando) return;
   $("erro-venda").hidden = true;
   const existente = carrinho.find((item) => item.id === produto.id);
 
@@ -152,6 +153,7 @@ function adicionar(produto) {
 }
 
 function alterarQuantidade(item, nova) {
+  if (enviando) return;
   $("erro-venda").hidden = true;
 
   if (!Number.isInteger(nova) || nova < 1) {
@@ -223,6 +225,7 @@ function atualizarTroco() {
 }
 
 function limparCarrinho() {
+  if (enviando) return;
   carrinho = [];
   $("recebido").value = "";
   $("erro-venda").hidden = true;
@@ -277,10 +280,11 @@ async function finalizar() {
   try {
     const venda = await enviar("POST", "/vendas", {
       formaPagamento: forma,
-      itens: carrinho.map((i) => ({ medicamentoId: i.id, quantidade: i.quantidade })),
+      itens: carrinho.map((i) => ({ medicamentoId: i.id, quantidade: i.quantidade, precoEsperado: i.preco })),
     });
 
     const recebidoEmCentavos = forma === "DINHEIRO" && recebido !== "" ? centavos(recebido) : null;
+    enviando = false;
     limparCarrinho();
     mostrarRecibo(venda, recebidoEmCentavos);
   } catch (erro) {

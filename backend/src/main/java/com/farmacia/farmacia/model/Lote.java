@@ -50,10 +50,12 @@ public class Lote {
     }
 
     public void adicionar(int quantidade) {
-        this.quantidadeAtual += quantidade;
+        if (quantidade <= 0) throw new IllegalArgumentException("A quantidade deve ser maior que zero.");
+        this.quantidadeAtual = Math.addExact(this.quantidadeAtual, quantidade);
     }
 
     public void remover(int quantidade) {
+        if (quantidade <= 0) throw new IllegalArgumentException("A quantidade deve ser maior que zero.");
         if (quantidade > this.quantidadeAtual) {
             throw new IllegalStateException("Quantidade maior que o saldo do lote.");
         }

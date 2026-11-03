@@ -1,3 +1,5 @@
+-- Referência histórica: não executar para instalar ou atualizar o sistema.
+-- O esquema atual é controlado por backend/src/main/resources/db/migration.
 -- ============================================================
 -- farmacia-manager | Modelo do banco (versão 0.1)
 -- SGBD: PostgreSQL

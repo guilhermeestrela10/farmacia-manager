@@ -1,6 +1,7 @@
 package com.farmacia.farmacia.security;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,9 @@ import jakarta.servlet.http.HttpSession;
 
 public class UsuarioAtivoFilter extends OncePerRequestFilter {
 
+    /** Versão da senha autenticada, guardada na sessão para comparar com a versão atual. */
+    public static final String ATRIBUTO_LOGIN = "loginEm";
+
     private final UsuarioRepository usuarios;
 
     public UsuarioAtivoFilter(UsuarioRepository usuarios) {
@@ -34,11 +38,11 @@ public class UsuarioAtivoFilter extends OncePerRequestFilter {
                 && autenticacao.isAuthenticated()
                 && !(autenticacao instanceof AnonymousAuthenticationToken)) {
 
-            boolean ativo = usuarios.findByLogin(autenticacao.getName())
-                    .map(Usuario::isAtivo)
+            boolean valida = usuarios.findByLogin(autenticacao.getName())
+                    .map(u -> u.isAtivo() && !senhaDaSessaoDiferente(u, request))
                     .orElse(false);
 
-            if (!ativo) {
+            if (!valida) {
                 SecurityContextHolder.clearContext();
                 HttpSession sessao = request.getSession(false);
                 if (sessao != null) {
@@ -52,5 +56,13 @@ public class UsuarioAtivoFilter extends OncePerRequestFilter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    private boolean senhaDaSessaoDiferente(Usuario usuario, HttpServletRequest request) {
+        HttpSession sessao = request.getSession(false);
+        Object loginEm = sessao == null ? null : sessao.getAttribute(ATRIBUTO_LOGIN);
+
+        Instant versaoAtual = usuario.getSenhaAlteradaEm() == null ? Instant.EPOCH : usuario.getSenhaAlteradaEm();
+        return !versaoAtual.equals(loginEm);
     }
 }

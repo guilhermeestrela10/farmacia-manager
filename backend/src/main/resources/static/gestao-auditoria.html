@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auditoria | Farmácias Ruanna</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/extras.css">
+</head>
+<body class="com-layout" data-pagina="auditoria">
+  <main>
+    <header class="topo"><h1>Auditoria</h1></header>
+    <form id="filtros" class="filtros">
+      <label>De <input id="de" type="date"></label>
+      <label>Até <input id="ate" type="date"></label>
+      <label>Login do usuário <input id="usuario" maxlength="50" autocomplete="off"></label>
+      <label>Tipo <select id="tipo">
+        <option value="">Todos</option>
+        <option value="ACESSO">Acesso</option>
+        <option value="ALTERACAO">Alteração</option>
+        <option value="PRECO">Preço</option>
+      </select></label>
+      <label><input id="recusadas" type="checkbox"> Somente recusadas</label>
+      <label>Limite <input id="limite" type="number" min="1" max="1000" value="100" required></label>
+      <button id="buscar" class="btn" type="submit">Buscar</button>
+    </form>
+    <p id="erro" class="erro" role="alert" hidden></p>
+    <p id="resumo" role="status" aria-live="polite"></p>
+    <div style="overflow-x: auto">
+      <table>
+        <caption>Histórico de acessos e alterações</caption>
+        <thead><tr><th>Data e hora</th><th>Usuário</th><th>Tipo</th><th>Ação</th><th>Resultado</th><th>IP</th></tr></thead>
+        <tbody id="registros"></tbody>
+      </table>
+    </div>
+  </main>
+  <script src="js/comum.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/gestao-auditoria.js"></script>
+</body>
+</html>
