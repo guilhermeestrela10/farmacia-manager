@@ -35,6 +35,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -69,7 +70,7 @@ public class RelatorioService {
 
     /* ---------- Vendas ---------- */
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public RelatorioVendasResponse vendas(LocalDate de, LocalDate ate) {
         Periodo periodo = periodo(de, ate);
         ZoneId zona = ZoneId.systemDefault();
@@ -172,7 +173,7 @@ public class RelatorioService {
 
     /* ---------- Posição do estoque ---------- */
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public RelatorioEstoqueResponse estoque(LocalDate de, LocalDate ate) {
         LocalDate hoje = LocalDate.now();
         Periodo periodo = periodo(de, ate);

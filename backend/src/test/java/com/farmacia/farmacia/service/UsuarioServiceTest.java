@@ -46,6 +46,21 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void bloqueioOcorridoDuranteEsperaDoUsuarioImpedeTroca() {
+        String hashAnterior = usuario.getSenhaHash();
+        when(repository.buscarPorLoginComTravamento("vendedor1")).thenAnswer(invocacao -> {
+            for (int i = 0; i < 5; i++) tentativas.registrarFalha("vendedor1");
+            return Optional.of(usuario);
+        });
+        var erro = assertThrows(ResponseStatusException.class,
+                () -> service.trocarPropriaSenha("vendedor1", "Exemplo123!", "OutraSenha123!"));
+        assertEquals(429, erro.getStatusCode().value());
+        assertEquals(hashAnterior, usuario.getSenhaHash());
+        assertNull(usuario.getSenhaAlteradaEm());
+        assertTrue(tentativas.bloqueado("vendedor1"));
+    }
+
+    @Test
     void rejeitaSenhaComMaisDeSetentaEDoisBytes() {
         when(repository.buscarPorIdComTravamento(1L)).thenReturn(Optional.of(usuario));
         var erro = assertThrows(ResponseStatusException.class,

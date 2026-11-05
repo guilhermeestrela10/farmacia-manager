@@ -21,14 +21,11 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
     List<Lote> findByMedicamentoIdAndQuantidadeAtualGreaterThanOrderByValidade(
             Long medicamentoId, int quantidade);
 
-    @Query("select coalesce(sum(l.quantidadeAtual), 0L) from Lote l "
-            + "where l.medicamento.id = :medicamentoId")
-    long somarQuantidadePorMedicamento(@Param("medicamentoId") Long medicamentoId);
-
-    @Query("select coalesce(sum(l.quantidadeAtual), 0L) from Lote l "
-            + "where l.medicamento.id = :medicamentoId and l.validade >= :hoje")
-    long somarDisponivelPorMedicamento(@Param("medicamentoId") Long medicamentoId,
-                                       @Param("hoje") LocalDate hoje);
+    @Query("select coalesce(sum(l.quantidadeAtual), 0L), "
+            + "coalesce(sum(case when l.validade >= :hoje then l.quantidadeAtual else 0 end), 0L) "
+            + "from Lote l where l.medicamento.id = :medicamentoId")
+    List<Object[]> resumirSaldoPorMedicamento(@Param("medicamentoId") Long medicamentoId,
+                                            @Param("hoje") LocalDate hoje);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select l from Lote l "

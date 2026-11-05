@@ -4,6 +4,7 @@ import com.farmacia.farmacia.repository.UsuarioRepository;
 import com.farmacia.farmacia.service.AuditoriaService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableWebSecurity
@@ -23,7 +25,13 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder() {
+            @Override
+            protected boolean matchesNonNull(String senha, String hash) {
+                return senha.getBytes(StandardCharsets.UTF_8).length <= 72
+                        && super.matchesNonNull(senha, hash);
+            }
+        };
     }
 
     @Bean
@@ -31,7 +39,8 @@ public class SecurityConfig {
                                        UsuarioRepository usuarios,
                                        TentativasDeLogin tentativas,
                                        AuditoriaService auditoria,
-                                       AuditoriaDeAcessos acessos) throws Exception {
+                                       AuditoriaDeAcessos acessos,
+                                       PlatformTransactionManager transacoes) throws Exception {
 
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
         csrfHandler.setCsrfRequestAttributeName(null);
@@ -108,7 +117,7 @@ public class SecurityConfig {
                         }))
 
                 .addFilterAfter(new UsuarioAtivoFilter(usuarios), SecurityContextHolderFilter.class)
-                .addFilterAfter(new AuditoriaFilter(auditoria), UsuarioAtivoFilter.class);
+                .addFilterAfter(new AuditoriaFilter(auditoria, transacoes), UsuarioAtivoFilter.class);
 
         return http.build();
     }

@@ -222,9 +222,10 @@ public class EstoqueService {
     @Transactional(readOnly = true)
     public SaldoResponse consultarSaldo(Long medicamentoId) {
         Medicamento medicamento = buscarMedicamento(medicamentoId);
-        long total = loteRepository.somarQuantidadePorMedicamento(medicamento.getId());
-        long disponivel = loteRepository.somarDisponivelPorMedicamento(
-                medicamento.getId(), LocalDate.now());
+        Object[] saldo = loteRepository.resumirSaldoPorMedicamento(
+                medicamento.getId(), LocalDate.now()).getFirst();
+        long total = ((Number) saldo[0]).longValue();
+        long disponivel = ((Number) saldo[1]).longValue();
 
         return new SaldoResponse(
                 medicamento.getId(),
