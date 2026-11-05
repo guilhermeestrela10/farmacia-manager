@@ -9,10 +9,18 @@ import java.util.Set;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class AuditoriaFilter extends OncePerRequestFilter {
     private final AuditoriaService service;
-    public AuditoriaFilter(AuditoriaService service) { this.service = service; }
+    private final TransactionTemplate transacao;
+
+    public AuditoriaFilter(AuditoriaService service, PlatformTransactionManager transacoes) {
+        this.service = service;
+        this.transacao = new TransactionTemplate(transacoes);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -25,15 +33,41 @@ public class AuditoriaFilter extends OncePerRequestFilter {
         }
         var auth = SecurityContextHolder.getContext().getAuthentication();
         String usuario = auth == null || auth instanceof AnonymousAuthenticationToken ? "anônimo" : auth.getName();
-        boolean concluida = false;
+        String caminho = req.getRequestURI();
+        String acao = DescritorDeAcao.descrever(metodo, caminho);
+        var resposta = new ContentCachingResponseWrapper(res);
         try {
-            chain.doFilter(req, res);
-            concluida = true;
-        } finally {
-            // Nunca ler corpo, parâmetros ou query string: podem conter senhas.
-            String caminho = req.getRequestURI();
-            service.registrar(TipoAuditoria.ALTERACAO, usuario, DescritorDeAcao.descrever(metodo, caminho),
-                    metodo, caminho, concluida ? res.getStatus() : 500, req.getRemoteAddr());
+            // A alteração e sua auditoria confirmam juntas, antes de liberar a resposta.
+            transacao.executeWithoutResult(status -> {
+                try {
+                    chain.doFilter(req, resposta);
+                } catch (ServletException | IOException ex) {
+                    throw new FalhaNaRequisicao(ex);
+                }
+                if (resposta.getStatus() >= 400) {
+                    status.setRollbackOnly();
+                } else {
+                    service.registrarAlteracao(usuario, acao, metodo, caminho, resposta.getStatus(), req.getRemoteAddr());
+                }
+            });
+        } catch (RuntimeException ex) {
+            try {
+                service.registrar(TipoAuditoria.ALTERACAO, usuario, acao, metodo, caminho, 500, req.getRemoteAddr());
+            } catch (RuntimeException falhaAuditoria) {
+                ex.addSuppressed(falhaAuditoria);
+            }
+            if (ex instanceof FalhaNaRequisicao && ex.getCause() instanceof ServletException servlet) throw servlet;
+            if (ex instanceof FalhaNaRequisicao && ex.getCause() instanceof IOException io) throw io;
+            throw ex;
         }
+        // Recusas ficam registradas fora da transação revertida, sem corpo ou query string.
+        if (resposta.getStatus() >= 400) {
+            service.registrar(TipoAuditoria.ALTERACAO, usuario, acao, metodo, caminho, resposta.getStatus(), req.getRemoteAddr());
+        }
+        resposta.copyBodyToResponse();
+    }
+
+    private static class FalhaNaRequisicao extends RuntimeException {
+        FalhaNaRequisicao(Exception causa) { super(causa); }
     }
 }

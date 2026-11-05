@@ -9,7 +9,9 @@ if (-not $env:JAVA_HOME -or -not (Test-Path -LiteralPath "$env:JAVA_HOME\bin\jav
     $env:JAVA_HOME = $jdkTeste.FullName
 }
 
-node --test src/test/js/estoque-medicamentos.test.cjs src/test/js/vendas.test.cjs
+$nodeTeste = (Get-Command node.exe -CommandType Application -ErrorAction Stop).Source
+$arquivosJsTeste = @(Get-ChildItem -LiteralPath 'src/test/js' -Filter '*.test.cjs' | ForEach-Object { $_.FullName })
+& $nodeTeste --test @arquivosJsTeste
 if ($LASTEXITCODE -ne 0) { throw 'Os testes JavaScript falharam.' }
 
 $pgBinTeste = 'C:\Program Files\PostgreSQL\18\bin'

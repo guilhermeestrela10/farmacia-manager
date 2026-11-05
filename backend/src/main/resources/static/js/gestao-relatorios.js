@@ -9,6 +9,7 @@ const FORMAS = {
 
 let vendas = null;
 let estoque = null;
+let versaoCarga = 0;
 
 /* ---------- Apoio ---------- */
 
@@ -196,6 +197,9 @@ function exportar(tipo) {
 /* ---------- Carregamento ---------- */
 
 async function carregar() {
+  const versao = ++versaoCarga;
+  vendas = null;
+  for (const botao of document.querySelectorAll("[data-csv]")) botao.disabled = true;
   limparErro();
 
   const parametros = new URLSearchParams();
@@ -203,12 +207,14 @@ async function carregar() {
   if ($("f-ate").value) parametros.set("ate", $("f-ate").value);
 
   try {
-    [vendas, estoque] = await Promise.all([
+    const respostas = await Promise.all([
       requisitar("/gestao/relatorios/vendas?" + parametros),
       requisitar("/gestao/relatorios/estoque?" + parametros),
     ]);
+    if (versao !== versaoCarga) return;
+    [vendas, estoque] = respostas;
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoCarga) mostrarErro(erro.message);
     return;
   }
 
@@ -244,6 +250,7 @@ async function carregar() {
     ["Perdas no período", moeda(estoque.valorPerdas),
       numero(estoque.unidadesPerdidas) + " un.", "alerta"],
   ]);
+  for (const botao of document.querySelectorAll("[data-csv]")) botao.disabled = false;
 }
 
 /* ---------- Eventos ---------- */

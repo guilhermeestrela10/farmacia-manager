@@ -32,6 +32,11 @@ class SecurityConfigTest {
     static class Config {
         @Bean UsuarioRepository usuarios() { return mock(UsuarioRepository.class); }
         @Bean AuditoriaService auditoria() { return mock(AuditoriaService.class); }
+        @Bean org.springframework.transaction.PlatformTransactionManager transacoes() {
+            var manager = mock(org.springframework.transaction.PlatformTransactionManager.class);
+            when(manager.getTransaction(any())).thenAnswer(invocacao -> new org.springframework.transaction.support.SimpleTransactionStatus());
+            return manager;
+        }
     }
 
     @RestController
@@ -66,6 +71,31 @@ class SecurityConfigTest {
                 .cookie(new jakarta.servlet.http.Cookie("XSRF-TOKEN", csrf.getToken()))
                 .header(csrf.getHeaderName(), csrf.getToken())
                 .param("username", usuario).param("password", senha));
+    }
+
+    @Test
+    void encoderCompartilhadoRecusaSenhasQueExcedemSetentaEDoisBytes() {
+        var encoder = context.getBean(org.springframework.security.crypto.password.PasswordEncoder.class);
+        String senhaAcentuada = "á".repeat(36);
+        String hashAcentuado = encoder.encode(senhaAcentuada);
+        assertTrue(encoder.matches(senhaAcentuada, hashAcentuado));
+        assertFalse(encoder.matches(senhaAcentuada + "x", hashAcentuado));
+        String senhaAscii = "a".repeat(72);
+        String hashAscii = encoder.encode(senhaAscii);
+        assertTrue(encoder.matches(senhaAscii, hashAscii));
+        assertFalse(encoder.matches(senhaAscii + "x", hashAscii));
+        assertFalse(encoder.matches(null, hashAscii));
+    }
+
+    @Test
+    void loginComSufixoAlemDoLimiteContaComoFalha() throws Exception {
+        var encoder = context.getBean(org.springframework.security.crypto.password.PasswordEncoder.class);
+        String senha = "á".repeat(36);
+        var usuario = new Usuario("Vendedor fictício", "vendedor1", encoder.encode(senha), Perfil.VENDEDOR);
+        when(context.getBean(UsuarioRepository.class).findByLogin("vendedor1")).thenReturn(Optional.of(usuario));
+        for (int i = 0; i < 4; i++) login("vendedor1", senha + "x").andExpect(status().isUnauthorized());
+        login("vendedor1", senha + "x").andExpect(status().isTooManyRequests());
+        assertNull(sessao.getAttribute(UsuarioAtivoFilter.ATRIBUTO_LOGIN));
     }
 
     @Test

@@ -60,7 +60,7 @@ $env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.5'
 .\mvnw.cmd -q -DskipTests compile
 ```
 
-O último ciclo completo passou com 41 testes Java e 6 testes JavaScript. Inclui FEFO, venda tudo-ou-nada, cancelamento, concorrência de estoque e usuários, permissões, senhas e migrações V1–V9.
+O último ciclo completo (05/11/2026) passou com 53 testes Java e 23 testes JavaScript. Inclui FEFO, venda tudo-ou-nada, cancelamento, concorrência de estoque e usuários, auditoria transacional, relatórios com leitura consistente, validação JSON, permissões, senhas e migrações V1–V9.
 
 ## Regras importantes
 
@@ -68,9 +68,12 @@ O último ciclo completo passou com 41 testes Java e 6 testes JavaScript. Inclui
 - Preço de venda vem do servidor. A tela envia também o preço confirmado para recusar alterações ocorridas depois da inclusão no carrinho.
 - Vendedor não acessa Gestão. Cancelamento exige administrador e motivo.
 - A versão da senha autenticada é conferida a cada requisição; redefinir a senha encerra sessões antigas na próxima requisição.
+- Quantidades e IDs devem ser inteiros no JSON; números fracionários são recusados sem truncamento. Preços continuam aceitando duas casas decimais.
+- Alterações de dados e sua auditoria confirmam na mesma transação. A resposta de sucesso só é liberada após essa confirmação; recusas são auditadas fora da transação revertida.
 - Migrações já aplicadas nunca são editadas. V3 e V5 foram aplicadas vazias neste projeto; V8 completa sua estrutura sem alterar checksums.
 - V9 garante unicidade de nomes de categorias e fabricantes sem distinguir maiúsculas, conforme a configuração regional do PostgreSQL. Duplicatas existentes devem ser resolvidas antes de aplicar essa versão; a migração não apaga nem mescla cadastros.
 
 O bloqueio de login ainda fica em memória e é limpo ao reiniciar. A busca do catálogo ainda filtra em Java. HTTPS, backups e configuração de produção continuam pendentes. Use dados fictícios na validação.
 
 Veja o [escopo atual](docs/escopo-mvp.md), o [diagnóstico da retomada](docs/retomada-seguranca-4b-4c.md) e o [registro das correções](docs/correcoes-revisao-projeto.md).
+Veja também a [revisão adicional de 05/11/2026](docs/revisao-2026-11-05.md).

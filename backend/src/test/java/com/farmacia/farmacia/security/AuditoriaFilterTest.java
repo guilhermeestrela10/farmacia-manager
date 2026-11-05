@@ -12,6 +12,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 class AuditoriaFilterTest {
+    private final org.springframework.transaction.PlatformTransactionManager transacoes = mock(org.springframework.transaction.PlatformTransactionManager.class);
+
+    private AuditoriaFilter filtro(AuditoriaService service) {
+        when(transacoes.getTransaction(any())).thenAnswer(invocacao -> new org.springframework.transaction.support.SimpleTransactionStatus());
+        return new AuditoriaFilter(service, transacoes);
+    }
     @AfterEach
     void limpar() { SecurityContextHolder.clearContext(); }
 
@@ -23,7 +29,7 @@ class AuditoriaFilterTest {
         req.setContent("{\"senha\":\"nao-registrar\"}".getBytes());
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("vendedor1", null, java.util.List.of()));
-        new AuditoriaFilter(service).doFilter(req, new MockHttpServletResponse(),
+        filtro(service).doFilter(req, new MockHttpServletResponse(),
                 (request, response) -> ((jakarta.servlet.http.HttpServletResponse) response).setStatus(403));
         verify(service).registrar(eq(TipoAuditoria.ALTERACAO), eq("vendedor1"),
                 eq("Redefinir senha do usuário #12"), eq("POST"),
@@ -34,7 +40,7 @@ class AuditoriaFilterTest {
     @Test
     void naoRegistraConsultas() throws Exception {
         var service = mock(AuditoriaService.class);
-        new AuditoriaFilter(service).doFilter(new MockHttpServletRequest("GET", "/gestao/auditoria"),
+        filtro(service).doFilter(new MockHttpServletRequest("GET", "/gestao/auditoria"),
                 new MockHttpServletResponse(), (request, response) -> {});
         verifyNoInteractions(service);
     }

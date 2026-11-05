@@ -18,6 +18,7 @@ let carrinho = [];
 let esperaBusca;
 let temporizadorAviso;
 let enviando = false;
+let versaoBusca = 0;
 
 /* ---------- Dinheiro em centavos (evita erro de arredondamento) ---------- */
 
@@ -92,6 +93,7 @@ function renderProdutos() {
 }
 
 async function carregarProdutos() {
+  const versao = ++versaoBusca;
   limparErro();
 
   const parametros = new URLSearchParams();
@@ -101,10 +103,14 @@ async function carregarProdutos() {
   if ($("filtro-tipo").value) parametros.set("tipo", $("filtro-tipo").value);
 
   try {
-    produtos = await requisitar("/vendas/produtos?" + parametros);
+    const encontrados = await requisitar("/vendas/produtos?" + parametros);
+    if (versao !== versaoBusca) return null;
+    produtos = encontrados;
     renderProdutos();
+    return { produtos: encontrados, versao };
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoBusca) mostrarErro(erro.message);
+    return null;
   }
 }
 
@@ -300,6 +306,7 @@ async function finalizar() {
 /* ---------- Eventos ---------- */
 
 $("busca").addEventListener("input", () => {
+  ++versaoBusca;
   clearTimeout(esperaBusca);
   esperaBusca = setTimeout(carregarProdutos, 300);
 });
@@ -309,10 +316,11 @@ $("busca").addEventListener("keydown", async (evento) => {
   if (evento.key !== "Enter") return;
   evento.preventDefault();
   clearTimeout(esperaBusca);
-  await carregarProdutos();
+  const resultado = await carregarProdutos();
 
-  if (produtos.length === 1 && produtos[0].disponivel > 0) {
-    adicionar(produtos[0]);
+  if (resultado && resultado.versao === versaoBusca
+      && resultado.produtos.length === 1 && resultado.produtos[0].disponivel > 0) {
+    adicionar(resultado.produtos[0]);
     $("busca").value = "";
     await carregarProdutos();
   }

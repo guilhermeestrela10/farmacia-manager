@@ -30,6 +30,11 @@ public class AuditoriaService {
         repository.save(new RegistroAuditoria(tipo, usuario, acao, metodo, caminho, status, ip));
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void registrarAlteracao(String usuario, String acao, String metodo, String caminho, int status, String ip) {
+        repository.save(new RegistroAuditoria(TipoAuditoria.ALTERACAO, usuario, acao, metodo, caminho, status, ip));
+    }
+
     // A alteração de preço e seu registro devem confirmar ou reverter juntos.
     @Transactional(propagation = Propagation.MANDATORY)
     public void registrarPreco(String usuario, String acao, String caminho, String ip) {

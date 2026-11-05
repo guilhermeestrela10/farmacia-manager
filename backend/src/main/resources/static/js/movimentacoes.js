@@ -1,4 +1,5 @@
 const LIMITE = 200;
+let versaoCarga = 0;
 
 const TIPOS = {
   ENTRADA: ["Entrada", "bom", "+"],
@@ -47,6 +48,7 @@ function renderTabela(lista) {
 }
 
 async function carregar() {
+  const versao = ++versaoCarga;
   limparErro();
 
   const parametros = new URLSearchParams({ limite: String(LIMITE) });
@@ -56,9 +58,10 @@ async function carregar() {
   if ($("f-ate").value) parametros.set("ate", $("f-ate").value);
 
   try {
-    renderTabela(await requisitar("/estoque/movimentacoes?" + parametros));
+    const movimentacoes = await requisitar("/estoque/movimentacoes?" + parametros);
+    if (versao === versaoCarga) renderTabela(movimentacoes);
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoCarga) mostrarErro(erro.message);
   }
 }
 

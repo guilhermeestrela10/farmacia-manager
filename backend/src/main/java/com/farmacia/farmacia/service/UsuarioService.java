@@ -119,6 +119,11 @@ public class UsuarioService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, "Sessão inválida. Entre novamente."));
 
+        if (tentativas.bloqueado(login)) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Muitas tentativas. Aguarde alguns minutos e tente de novo.");
+        }
+
         if (!encoder.matches(senhaAtual, usuario.getSenhaHash())) {
             tentativas.registrarFalha(login);
             throw new ResponseStatusException(
