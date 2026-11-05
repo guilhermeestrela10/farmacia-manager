@@ -5,6 +5,7 @@ let editandoId = null;
 let esperaBusca;
 let temporizadorAviso;
 let salvando = false;
+let versaoBusca = 0;
 
 const TIPOS = {
   REFERENCIA: ["Referência", "neutro"],
@@ -112,6 +113,7 @@ function renderTabela() {
 }
 
 async function carregarLista() {
+  const versao = ++versaoBusca;
   limparErro();
 
   const parametros = new URLSearchParams();
@@ -122,10 +124,12 @@ async function carregarLista() {
   if ($("inativos").checked) parametros.set("incluirInativos", "true");
 
   try {
-    medicamentos = await requisitar("/medicamentos?" + parametros);
+    const encontrados = await requisitar("/medicamentos?" + parametros);
+    if (versao !== versaoBusca) return;
+    medicamentos = encontrados;
     renderTabela();
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoBusca) mostrarErro(erro.message);
   }
 }
 
@@ -218,6 +222,7 @@ $("filtro-categoria").addEventListener("change", carregarLista);
 $("filtro-tipo").addEventListener("change", carregarLista);
 
 $("busca").addEventListener("input", () => {
+  ++versaoBusca;
   clearTimeout(esperaBusca);
   esperaBusca = setTimeout(carregarLista, 300);
 });

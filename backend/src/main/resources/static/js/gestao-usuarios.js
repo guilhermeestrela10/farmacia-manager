@@ -2,6 +2,8 @@ let usuarios = [];
 let temporizadorAviso;
 let usuarioDaSenha = null;
 let senhaPropria = false;
+let versaoSenha = 0;
+let salvandoSenha = false;
 
 const PERFIS = { ADMIN: "Administrador", VENDEDOR: "Vendedor" };
 
@@ -119,6 +121,7 @@ async function salvar(evento) {
 /* ---------- Redefinir senha ---------- */
 
 function abrirSenha(usuario) {
+  ++versaoSenha;
   usuarioDaSenha = usuario;
   senhaPropria = Boolean(window.usuarioAtual && window.usuarioAtual.login === usuario.login);
 
@@ -128,33 +131,44 @@ function abrirSenha(usuario) {
   $("nova-senha").type = "password";
   $("ver-nova-senha").checked = false;
   $("erro-senha").hidden = true;
+  $("salvar-senha").disabled = salvandoSenha;
   $("janela-senha").showModal();
 }
 
 async function salvarSenha(evento) {
   evento.preventDefault();
+  if (salvandoSenha) return;
+  const usuario = usuarioDaSenha;
+  const propria = senhaPropria;
+  const versao = versaoSenha;
 
   const botao = $("salvar-senha");
+  salvandoSenha = true;
   botao.disabled = true;
 
   try {
-    await enviar("POST", "/usuarios/" + usuarioDaSenha.id + "/senha",
+    await enviar("POST", "/usuarios/" + usuario.id + "/senha",
       { senha: $("nova-senha").value });
 
-    $("nova-senha").value = "";
-    $("janela-senha").close();
+    if (versao === versaoSenha) {
+      $("nova-senha").value = "";
+      $("janela-senha").close();
+    }
 
-    if (senhaPropria) {
+    if (propria) {
       location.href = "login.html";
       return;
     }
 
-    mostrarAviso("Senha de " + usuarioDaSenha.nome
+    mostrarAviso("Senha de " + usuario.nome
       + " redefinida. Se ela estava logada, foi desconectada.");
   } catch (erro) {
-    $("erro-senha").textContent = erro.message;
-    $("erro-senha").hidden = false;
+    if (versao === versaoSenha) {
+      $("erro-senha").textContent = erro.message;
+      $("erro-senha").hidden = false;
+    }
   } finally {
+    salvandoSenha = false;
     botao.disabled = false;
   }
 }
@@ -168,7 +182,11 @@ $("ver-senha").addEventListener("change", () => {
   $("senha").type = $("ver-senha").checked ? "text" : "password";
 });
 
-$("cancelar-senha").addEventListener("click", () => $("janela-senha").close());
+$("cancelar-senha").addEventListener("click", () => {
+  ++versaoSenha;
+  $("janela-senha").close();
+});
+$("janela-senha").addEventListener("cancel", () => { ++versaoSenha; });
 $("form-senha").addEventListener("submit", salvarSenha);
 $("ver-nova-senha").addEventListener("change", () => {
   $("nova-senha").type = $("ver-nova-senha").checked ? "text" : "password";

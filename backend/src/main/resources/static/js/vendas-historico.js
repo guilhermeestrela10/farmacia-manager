@@ -8,6 +8,9 @@ const FORMAS = {
 let ehAdmin = false;
 let vendaAberta = null;
 let temporizadorAviso;
+let versaoCarga = 0;
+let versaoDetalhe = 0;
+let cancelando = false;
 
 function hojeISO() {
   return new Date().toLocaleDateString("sv-SE");
@@ -88,6 +91,7 @@ function renderTabela(h) {
 }
 
 async function carregar() {
+  const versao = ++versaoCarga;
   limparErro();
 
   const parametros = new URLSearchParams();
@@ -98,20 +102,23 @@ async function carregar() {
 
   try {
     const historico = await requisitar("/vendas?" + parametros);
+    if (versao !== versaoCarga) return;
     renderCartoes(historico);
     renderTabela(historico);
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoCarga) mostrarErro(erro.message);
   }
 }
 
 /* ---------- Detalhe e cancelamento ---------- */
 
 async function abrirDetalhe(id) {
+  const versao = ++versaoDetalhe;
   limparErro();
 
   try {
     const venda = await requisitar("/vendas/" + id);
+    if (versao !== versaoDetalhe) return;
     vendaAberta = venda;
 
     const cancelada = venda.status === "CANCELADA";
@@ -142,14 +149,18 @@ async function abrirDetalhe(id) {
     $("area-cancelar").hidden = !(ehAdmin && !cancelada);
     $("motivo-cancelamento").value = "";
     $("erro-detalhe").hidden = true;
+    $("cancelar-venda").disabled = cancelando;
 
     $("detalhe").showModal();
   } catch (erro) {
-    mostrarErro(erro.message);
+    if (versao === versaoDetalhe) mostrarErro(erro.message);
   }
 }
 
 async function cancelarVenda() {
+  if (cancelando || !vendaAberta) return;
+  const venda = vendaAberta;
+  const versao = versaoDetalhe;
   const motivo = $("motivo-cancelamento").value.trim();
   const erro = $("erro-detalhe");
 
@@ -160,22 +171,26 @@ async function cancelarVenda() {
   }
 
   const confirmado = confirm(
-    "Cancelar a venda #" + vendaAberta.id + "?\n\nAs unidades voltam ao estoque. "
+    "Cancelar a venda #" + venda.id + "?\n\nAs unidades voltam ao estoque. "
     + "Essa ação não pode ser desfeita.");
   if (!confirmado) return;
 
   const botao = $("cancelar-venda");
+  cancelando = true;
   botao.disabled = true;
 
   try {
-    await enviar("POST", "/vendas/" + vendaAberta.id + "/cancelar", { motivo });
-    $("detalhe").close();
-    mostrarAviso("Venda #" + vendaAberta.id + " cancelada. As unidades voltaram ao estoque.");
+    await enviar("POST", "/vendas/" + venda.id + "/cancelar", { motivo });
+    if (versao === versaoDetalhe) $("detalhe").close();
+    mostrarAviso("Venda #" + venda.id + " cancelada. As unidades voltaram ao estoque.");
     await carregar();
   } catch (e) {
-    erro.textContent = e.message;
-    erro.hidden = false;
+    if (versao === versaoDetalhe) {
+      erro.textContent = e.message;
+      erro.hidden = false;
+    }
   } finally {
+    cancelando = false;
     botao.disabled = false;
   }
 }
@@ -223,7 +238,11 @@ async function carregarVendedores() {
   });
 
   $("cancelar-venda").addEventListener("click", cancelarVenda);
-  $("fechar-detalhe").addEventListener("click", () => $("detalhe").close());
+  $("fechar-detalhe").addEventListener("click", () => {
+    ++versaoDetalhe;
+    $("detalhe").close();
+  });
+  $("detalhe").addEventListener("cancel", () => { ++versaoDetalhe; });
 
   await carregar();
-})();   
+})();
