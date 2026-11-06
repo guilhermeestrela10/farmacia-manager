@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(csrfHandler))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login.html", "/css/**", "/js/comum.js",
+                        .requestMatchers("/health", "/demo/info", "/demo/entrar", "/login.html", "/css/**", "/js/comum.js",
                                 "/js/login.js", "/favicon.ico", "/error").permitAll()
                         .requestMatchers("/usuarios/**", "/gestao/**", "/gestao-*.html",
                                 "/js/gestao-*.js").hasRole("ADMIN")

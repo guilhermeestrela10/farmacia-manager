@@ -16,9 +16,15 @@ public final class DescritorDeAcao {
                 case "/categorias" -> "Criar categoria";
                 case "/fabricantes" -> "Criar fabricante";
                 case "/auth/senha" -> "Trocar própria senha";
+                case "/clientes" -> "Criar cliente";
+                case "/atendimentos" -> "Registrar atendimento manual";
+                case "/receitas" -> "Registrar receita";
+                case "/dispensacoes" -> "Registrar dispensação";
+                case "/demo/entrar" -> "Acesso público de demonstração";
                 default -> acaoComId(metodo, caminho);
             };
         }
+        if ("PUT".equals(metodo) && "/gestao/configuracoes".equals(caminho)) return "Atualizar configuração da farmácia";
         return acaoComId(metodo, caminho);
     }
 
@@ -30,8 +36,8 @@ public final class DescritorDeAcao {
                 String sufixo = partes[3];
                 if ("POST".equals(metodo) && "vendas".equals(partes[1]) && "cancelar".equals(sufixo)) return "Cancelar venda #" + id;
                 if ("usuarios".equals(partes[1]) && "POST".equals(metodo) && "senha".equals(sufixo)) return "Redefinir senha do usuário #" + id;
-                if ("PATCH".equals(metodo) && ("usuarios".equals(partes[1]) || "medicamentos".equals(partes[1]))) {
-                    String entidade = "usuarios".equals(partes[1]) ? "usuário" : "medicamento";
+                if ("PATCH".equals(metodo) && ("usuarios".equals(partes[1]) || "medicamentos".equals(partes[1]) || "clientes".equals(partes[1]))) {
+                    String entidade = "usuarios".equals(partes[1]) ? "usuário" : "clientes".equals(partes[1]) ? "cliente" : "medicamento";
                     if ("ativar".equals(sufixo)) return "Ativar " + entidade + " #" + id;
                     if ("desativar".equals(sufixo)) return "Desativar " + entidade + " #" + id;
                 }

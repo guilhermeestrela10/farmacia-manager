@@ -36,6 +36,13 @@ public class EstoqueController {
         this.service = service;
     }
 
+    @GetMapping("/lotes")
+    public List<LoteResponse> listarTodosLotes(
+            @RequestParam(required = false) String busca,
+            @RequestParam(defaultValue = "TODOS") String situacao) {
+        return service.listarLotes(busca, situacao);
+    }
+
     @PostMapping("/entradas")
     @ResponseStatus(HttpStatus.CREATED)
     public MovimentacaoResponse registrarEntrada(

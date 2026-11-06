@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atendimento Farmacêutico | Farmácia Manager</title>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/registros.css"></head>
+<body class="com-layout" data-pagina="atendimento">
+<main><header class="topo"><h1>Atendimento Farmacêutico</h1></header>
+<p class="aviso">Registro manual de demonstração. Sem validade clínica; não gera orientação ou prescrição.</p>
+<p id="erro" class="erro" role="alert" hidden></p><p id="aviso" class="aviso" role="status" aria-live="polite" hidden></p>
+<form id="formulario" class="registro"><fieldset ><legend>Registrar atendimento manual</legend><div class="campos"><label class="campo">Cliente fictício<select id="cliente" required></select></label><label class="campo">Profissional<input id="profissional" type="text" required maxlength="100"></label><label class="campo">Observações<textarea id="observacoes" required maxlength="2000"></textarea></label></div><button class="btn" type="submit">Registrar atendimento</button></fieldset></form><div class="barra"><label class="campo">Filtrar histórico por cliente<select id="filtro-cliente"></select></label></div><div class="tabela-area"><table><thead><tr><th scope="col">Cliente</th><th scope="col">Profissional</th><th scope="col">Observações</th><th scope="col">Registrado em</th></tr></thead><tbody id="corpo"></tbody></table></div></main>
+<script src="js/comum.js"></script><script src="js/layout.js"></script><script src="js/registros.js"></script><script src="js/atendimento.js"></script>
+</body></html>

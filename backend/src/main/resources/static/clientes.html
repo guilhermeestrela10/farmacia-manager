@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clientes | Farmácia Manager</title>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/registros.css"></head>
+<body class="com-layout" data-pagina="clientes">
+<main><header class="topo"><h1>Clientes</h1></header>
+
+<p id="erro" class="erro" role="alert" hidden></p><p id="aviso" class="aviso" role="status" aria-live="polite" hidden></p>
+<form id="formulario" class="registro"><fieldset ><legend>Novo cliente fictício</legend><div class="campos"><label class="campo">Nome<input id="nome" type="text" required maxlength="100"></label><label class="campo">Telefone<input id="telefone" type="tel" maxlength="30"></label><label class="campo">E-mail<input id="email" type="email" maxlength="150"></label></div><button class="btn" type="submit">Salvar</button></fieldset></form><div class="barra"><label class="campo">Buscar clientes<input id="busca" type="search" ></label></div><div class="tabela-area"><table><thead><tr><th scope="col">Nome</th><th scope="col">Telefone</th><th scope="col">E-mail</th><th scope="col">Situação</th><th scope="col">Ação</th></tr></thead><tbody id="corpo"></tbody></table></div></main>
+<script src="js/comum.js"></script><script src="js/layout.js"></script><script src="js/registros.js"></script><script src="js/clientes.js"></script>
+</body></html>

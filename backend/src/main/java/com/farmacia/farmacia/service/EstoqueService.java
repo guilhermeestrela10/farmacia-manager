@@ -46,6 +46,22 @@ public class EstoqueService {
         this.movimentacaoRepository = movimentacaoRepository;
     }
 
+    @Transactional(readOnly = true)
+    public List<LoteResponse> listarLotes(String busca, String situacao) {
+        LocalDate hoje = LocalDate.now();
+        LocalDate inicio = LocalDate.of(1, 1, 1);
+        LocalDate fim = LocalDate.of(9999, 12, 31);
+        switch (situacao == null ? "TODOS" : situacao) {
+            case "TODOS" -> { }
+            case "VALIDO" -> inicio = hoje;
+            case "PROXIMO" -> { inicio = hoje; fim = hoje.plusDays(90); }
+            case "VENCIDO" -> fim = hoje.minusDays(1);
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Situação de lote inválida.");
+        }
+        return loteRepository.buscarComSaldo(busca == null ? "" : busca.trim(), inicio, fim)
+                .stream().map(this::toResponse).toList();
+    }
+
     @Transactional
     public MovimentacaoResponse registrarEntrada(EntradaEstoqueRequest request) {
         Medicamento medicamento = buscarMedicamentoAtivo(request.medicamentoId());

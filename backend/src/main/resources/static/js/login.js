@@ -57,3 +57,31 @@ async function entrar(evento) {
 
 $("formulario").addEventListener("submit", entrar);
 jaEstaLogado();
+
+let entrandoDemo = false;
+async function entrarDemo(perfil) {
+  if (entrandoDemo) return;
+  entrandoDemo = true;
+  $("demo-admin").disabled = true;
+  $("demo-vendedor").disabled = true;
+  $("erro-demo").hidden = true;
+  try {
+    await enviar("POST", "/demo/entrar", { perfil });
+    location.href = "index.html";
+  } catch (erro) {
+    $("erro-demo").textContent = erro.message;
+    $("erro-demo").hidden = false;
+  } finally {
+    entrandoDemo = false;
+    $("demo-admin").disabled = false;
+    $("demo-vendedor").disabled = false;
+  }
+}
+
+demonstracao.then((dados) => {
+  if (!dados) return;
+  $("acessos-demo").hidden = false;
+  $("formulario").hidden = true;
+});
+$("demo-admin").addEventListener("click", () => entrarDemo("ADMIN"));
+$("demo-vendedor").addEventListener("click", () => entrarDemo("VENDEDOR"));

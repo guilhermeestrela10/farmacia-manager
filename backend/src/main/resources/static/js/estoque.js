@@ -345,6 +345,12 @@ $("formulario").addEventListener("submit", salvar);
   try {
     medicamentos = await requisitar("/medicamentos");
     preencherMedicamentos(medicamentos);
+    const id = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('medicamentoId');
+    if (id) {
+      if (!medicamentos.some(m => String(m.id) === id)) throw new Error('Medicamento não encontrado.');
+      $('medicamento').value = id;
+      await aoEscolher();
+    }
   } catch (erro) {
     mostrarErro(erro.message);
   }

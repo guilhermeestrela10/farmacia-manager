@@ -20,6 +20,14 @@ class EntradaJsonIntegracaoTest {
     @Autowired WebApplicationContext context;
     @Autowired JsonMapper mapper;
 
+    @Test
+    void perfilNormalNaoHabilitaEntradaPublicaDemo() throws Exception {
+        assertTrue(context.getBeansOfType(com.farmacia.farmacia.controller.DemoController.class).isEmpty());
+        var mvc = MockMvcBuilders.webAppContextSetup(context).build();
+        assertEquals(404, mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/demo/info"))
+                .andReturn().getResponse().getStatus());
+    }
+
     private String entrada(String id, String quantidade) {
         return "{\"medicamentoId\":" + id + ",\"numeroLote\":\"TESTE\",\"validade\":\""
                 + LocalDate.now().plusDays(1) + "\",\"quantidade\":" + quantidade + ",\"responsavel\":\"Teste\"}";
