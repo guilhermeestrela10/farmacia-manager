@@ -1,0 +1,15 @@
+.registro { margin-bottom: 24px; padding: 20px; background: #fff; border-radius: 12px; }
+.registro fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.registro legend { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.registro .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 12px; }
+.registro textarea { display: block; width: 100%; min-height: 80px; padding: 8px 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 8px; font: inherit; resize: vertical; }
+.registro textarea:focus { outline: 2px solid var(--amarelo); }
+.registro .itens { list-style: none; padding: 0; }
+.registro .itens li { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borda); }
+.registro .itens li span { flex: 1; min-width: 180px; }
+.registro .itens input { width: 100px; }
+.registro .total { font-size: 20px; font-weight: 700; }
+.btn:disabled { opacity: .55; cursor: wait; }
+.detalhe { padding: 20px; }
+.detalhe p { white-space: pre-wrap; overflow-wrap: anywhere; }
+dialog.detalhe { width: min(850px, 95vw); }

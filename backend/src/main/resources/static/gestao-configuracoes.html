@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurações | Farmácia Manager</title>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/registros.css"></head>
+<body class="com-layout" data-pagina="configuracoes">
+<main><header class="topo"><h1>Configurações</h1></header>
+
+<p id="erro" class="erro" role="alert" hidden></p><p id="aviso" class="aviso" role="status" aria-live="polite" hidden></p>
+<form id="formulario" class="registro"><fieldset disabled><legend>Dados da farmácia</legend><div class="campos"><label class="campo">Nome da farmácia<input id="nome-farmacia" type="text" required maxlength="100"></label><label class="campo">Telefone<input id="telefone" type="tel" maxlength="30"></label><label class="campo">E-mail<input id="email" type="email" maxlength="150"></label><label class="campo">Endereço<input id="endereco" type="text" maxlength="200"></label></div><button class="btn" type="submit">Salvar configurações</button></fieldset></form></main>
+<script src="js/comum.js"></script><script src="js/layout.js"></script><script src="js/registros.js"></script><script src="js/gestao-configuracoes.js"></script>
+</body></html>

@@ -12,7 +12,19 @@ Sistema web de gerenciamento de farmácia com medicamentos, estoque por lote e v
 - Perfis ADMIN/VENDEDOR, bloqueio de tentativas, troca/redefinição de senha e encerramento de sessões antigas.
 - Auditoria de acessos, alterações, recusas e preços; registros protegidos contra edição e exclusão.
 
-Clientes, atendimento farmacêutico, receitas, dispensações, configurações e uma tela dedicada de lotes continuam planejados. Os lotes já podem ser consultados e movimentados na tela Estoque. Medicamentos controlados e emissão de NFC-e estão fora do escopo atual.
+- Clientes com ativação/desativação, histórico manual de atendimento, receitas de exemplo e dispensações vinculadas a vendas.
+- Dispensação respeita validade e quantidade restante da receita, estoque FEFO e preço confirmado; cancelar a venda libera o saldo da receita.
+- Tela dedicada de lotes/validades e configurações da farmácia, com edição somente por administrador.
+
+## Demonstração online
+
+O perfil `demo` habilita entrada pública pelos botões **Abrir como administrador** e **Abrir como vendedor**. Não existem senhas fixas de demonstração. Uma carga transacional cria catálogo, lotes válidos/próximos/vencidos, vendas, clientes e registros fictícios somente em banco exclusivo vazio. Reiniciar não duplica esses dados nem apaga alterações.
+
+Todos os dados da demonstração são compartilhados. Nunca informe dados pessoais ou receitas reais. Atendimento e receitas são registros de exemplo: não validam prescrição, habilitação profissional ou regras sanitárias. Não há autorização fiscal, NFC-e ou gestão de controlados/SNGPC. O sistema demonstrativo não está liberado para operação real de uma farmácia.
+
+Publicação: `render.yaml` cria um serviço Docker gratuito no workspace **farmacia-manager**, usando o banco exclusivo `farmacia-manager-demo-db` da mesma região. As credenciais são referências `fromDatabase`, sem senhas no repositório. O workspace **My Workspace** não deve ser usado. HTTPS e cookies seguros ficam no perfil `prod`; a verificação `/health` consulta a disponibilidade do banco sem expor detalhes.
+
+O serviço gratuito suspende por inatividade e pode demorar a acordar. O banco gratuito criado em 05/11/2026 expira em **05/12/2026**. Esta infraestrutura é temporária: operação real exige banco durável, backups, controle de acesso privado e adequação clínica, sanitária e fiscal.
 
 ## Executar no Windows
 
@@ -50,7 +62,7 @@ cd 'C:\Users\guilh\projetos\farmacia-manager\backend'
 .\testar.ps1
 ```
 
-O script não reutiliza bancos existentes, não lê a configuração local e recusa execução se a porta de teste estiver ocupada. Os testes de integração usam somente o perfil `test` e o usuário fictício `farmacia_teste`.
+O script não reutiliza bancos existentes, não lê a configuração local e recusa execução se a porta de teste estiver ocupada. Os testes de integração usam o perfil `test` e o usuário fictício `farmacia_teste`. O teste de demonstração adiciona `demo` em esquema separado, sem acessar o banco de uso local.
 
 Para compilar sem iniciar a aplicação:
 
@@ -60,7 +72,7 @@ $env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.5'
 .\mvnw.cmd -q -DskipTests compile
 ```
 
-O último ciclo completo (05/11/2026) passou com 53 testes Java e 23 testes JavaScript. Inclui FEFO, venda tudo-ou-nada, cancelamento, concorrência de estoque e usuários, auditoria transacional, relatórios com leitura consistente, validação JSON, permissões, senhas e migrações V1–V9.
+O último ciclo completo (05/11/2026) passou com 67 testes Java e 44 testes JavaScript. Inclui FEFO, venda tudo-ou-nada, cancelamento, concorrência de estoque e usuários, auditoria transacional, relatórios com leitura consistente, validação JSON, permissões, senhas entrada demo com CSRF, dispensação concorrente e migrações V1–V10.
 
 ## Regras importantes
 
@@ -73,7 +85,7 @@ O último ciclo completo (05/11/2026) passou com 53 testes Java e 23 testes Java
 - Migrações já aplicadas nunca são editadas. V3 e V5 foram aplicadas vazias neste projeto; V8 completa sua estrutura sem alterar checksums.
 - V9 garante unicidade de nomes de categorias e fabricantes sem distinguir maiúsculas, conforme a configuração regional do PostgreSQL. Duplicatas existentes devem ser resolvidas antes de aplicar essa versão; a migração não apaga nem mescla cadastros.
 
-O bloqueio de login ainda fica em memória e é limpo ao reiniciar. A busca do catálogo ainda filtra em Java. HTTPS, backups e configuração de produção continuam pendentes. Use dados fictícios na validação.
+O bloqueio de login ainda fica em memória e é limpo ao reiniciar. A busca do catálogo ainda filtra em Java. O perfil `prod` configura HTTPS no proxy e cookies seguros. Backups duráveis e validação para operação real continuam pendentes. Use somente dados fictícios na demonstração.
 
 Veja o [escopo atual](docs/escopo-mvp.md), o [diagnóstico da retomada](docs/retomada-seguranca-4b-4c.md) e o [registro das correções](docs/correcoes-revisao-projeto.md).
 Veja também a [revisão adicional de 05/11/2026](docs/revisao-2026-11-05.md).

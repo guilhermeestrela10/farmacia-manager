@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispensações | Farmácia Manager</title>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/registros.css"></head>
+<body class="com-layout" data-pagina="dispensacoes">
+<main><header class="topo"><h1>Dispensações</h1></header>
+<p class="aviso">Demonstração sem validade clínica ou fiscal. Cada dispensação concluída gera uma venda e baixa o estoque disponível.</p>
+<p id="erro" class="erro" role="alert" hidden></p><p id="aviso" class="aviso" role="status" aria-live="polite" hidden></p>
+<form id="formulario" class="registro"><fieldset ><legend>Registrar dispensação</legend><div class="campos"><label class="campo">Receita de exemplo<select id="receita" required></select></label><label class="campo">Forma de pagamento<select id="pagamento"><option value="DINHEIRO">Dinheiro</option><option value="PIX">Pix</option><option value="DEBITO">Cartão de débito</option><option value="CREDITO">Cartão de crédito</option></select></label></div><button id="atualizar-receita" class="btn sec" type="button">Atualizar receita e preços</button><p id="resumo-receita"></p><ul id="itens" class="itens" aria-label="Quantidades a dispensar"></ul><p id="total" class="total" aria-live="polite">Total: R$ 0,00</p><button class="btn" type="submit">Confirmar dispensação</button></fieldset></form><div class="tabela-area"><table><thead><tr><th scope="col">Dispensação</th><th scope="col">Receita</th><th scope="col">Cliente</th><th scope="col">Venda</th><th scope="col">Total</th><th scope="col">Situação da venda</th><th scope="col">Registrada em</th></tr></thead><tbody id="corpo"></tbody></table></div></main>
+<script src="js/comum.js"></script><script src="js/layout.js"></script><script src="js/registros.js"></script><script src="js/dispensacoes.js"></script>
+</body></html>

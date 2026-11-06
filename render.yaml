@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: farmacia-manager-demo
+    runtime: docker
+    repo: https://github.com/guilhermeestrela10/farmacia-manager
+    branch: codex/demo-completa-render
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod,demo
+      - key: DB_HOST
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: password

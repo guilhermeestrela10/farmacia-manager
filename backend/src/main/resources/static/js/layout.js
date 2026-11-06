@@ -50,17 +50,17 @@ const MENU = [
       ],
       ["estoque", "Estoque", "estoque", "estoque.html"],
       ["medicamentos", "Medicamentos", "pilula", "medicamentos.html"],
-      ["lotes", "Lotes e Validades", "calendario", null],
+      ["lotes", "Lotes e Validades", "calendario", "lotes.html"],
       ["movimentacoes", "Movimentações", "movimentacoes", "movimentacoes.html"],
     ],
   },
   {
     titulo: "Atendimento",
     itens: [
-      ["clientes", "Clientes", "clientes", null],
-      ["atendimento", "Atendimento Farmacêutico", "atendimento", null],
-      ["receitas", "Receitas", "receitas", null],
-      ["dispensacoes", "Dispensações", "dispensacoes", null],
+      ["clientes", "Clientes", "clientes", "clientes.html"],
+      ["atendimento", "Atendimento Farmacêutico", "atendimento", "atendimento.html"],
+      ["receitas", "Receitas", "receitas", "receitas.html"],
+      ["dispensacoes", "Dispensações", "dispensacoes", "dispensacoes.html"],
     ],
   },
   {
@@ -70,7 +70,7 @@ const MENU = [
       ["relatorios", "Relatórios", "relatorios", "gestao-relatorios.html"],
       ["usuarios", "Usuários e Permissões", "usuarios", "gestao-usuarios.html"],
       ["auditoria", "Auditoria", "auditoria", "gestao-auditoria.html"],
-      ["configuracoes", "Configurações", "config", null],
+      ["configuracoes", "Configurações", "config", "gestao-configuracoes.html"],
     ],
   },
 ];
@@ -197,6 +197,18 @@ async function carregarUsuario() {
   }
 }
 
+let versaoNomeFarmacia = 0;
+
+function atualizarNomeFarmacia(configuracoes) {
+  const nome = configuracoes.nomeFarmacia;
+  if (!nome) return;
+  versaoNomeFarmacia++;
+  const marca = document.querySelector('.marca-pequena');
+  const slogan = document.querySelector('.slogan');
+  if (marca) marca.textContent = nome;
+  if (slogan) slogan.textContent = nome + ' · A saúde da comunidade';
+}
+
 function construirLayout() {
   const conteudo = document.querySelector("main");
   if (!conteudo) return;
@@ -215,6 +227,12 @@ function construirLayout() {
   }
 
   carregarUsuario();
+  const versaoNome = versaoNomeFarmacia;
+  requisitar('/configuracoes').then(configuracoes => {
+    if (versaoNome === versaoNomeFarmacia) atualizarNomeFarmacia(configuracoes);
+  }).catch(() => {
+    // Uma falha no cadastro não impede o acesso ao restante da aplicação.
+  });
 }
 
 construirLayout();

@@ -125,3 +125,16 @@ async function mostrarUsuario() {
 }
 
 document.addEventListener("DOMContentLoaded", mostrarUsuario);
+
+const demonstracao = fetch("/demo/info").then(async (resposta) => {
+  if (!resposta.ok) return null;
+  const dados = await resposta.json();
+  if (!dados.demo) return null;
+  const aviso = criar("p", "aviso-demo", dados.aviso);
+  aviso.setAttribute("role", "note");
+  Object.assign(aviso.style, { padding: "12px 16px", background: "#fff8cf", color: "#5c4300",
+    border: "1px solid #e2bf36", borderRadius: "8px", marginBottom: "18px", fontSize: "14px" });
+  const principal = document.querySelector("main");
+  if (principal) principal.prepend(aviso);
+  return dados;
+}).catch(() => null);

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lotes e Validades | Farmácia Manager</title>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/registros.css"></head>
+<body class="com-layout" data-pagina="lotes">
+<main><header class="topo"><h1>Lotes e Validades</h1></header>
+
+<p id="erro" class="erro" role="alert" hidden></p><p id="aviso" class="aviso" role="status" aria-live="polite" hidden></p>
+<form id="filtros" class="barra"><label class="campo">Medicamento ou lote<input id="busca" type="search" ></label><label class="campo">Situação<select id="situacao"><option value="TODOS">Todos</option><option value="VALIDO">Válidos</option><option value="PROXIMO">Vencem em até 90 dias</option><option value="VENCIDO">Vencidos</option></select></label><button class="btn" type="submit">Filtrar</button></form><div class="tabela-area"><table><thead><tr><th scope="col">Medicamento</th><th scope="col">Lote</th><th scope="col">Validade</th><th scope="col">Saldo</th><th scope="col">Estoque</th></tr></thead><tbody id="corpo"></tbody></table></div></main>
+<script src="js/comum.js"></script><script src="js/layout.js"></script><script src="js/registros.js"></script><script src="js/lotes.js"></script>
+</body></html>
