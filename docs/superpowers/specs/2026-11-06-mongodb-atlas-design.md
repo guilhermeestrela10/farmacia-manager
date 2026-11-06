@@ -4,7 +4,11 @@
 
 Usar MongoDB Atlas como banco do Farmácia Manager, mantendo APIs, telas e regras existentes. O usuário indicou o nome `farmacia-manager`. A aplicação online permanece no PostgreSQL até a troca estar validada.
 
-Na inspeção inicial, o conector Atlas encontrou somente `Project 0` / `Cluster0` (MongoDB 8.0, plano gratuito). O banco `farmacia-manager` não aparece entre os bancos persistidos. Falta confirmar se esse é o destino pretendido ou se o usuário criou outro projeto/cluster. Não criar, copiar ou alterar dados no cluster compartilhado antes dessa identificação. Não solicitar senha no chat.
+Destino atualizado pelo usuário: organização separada `farmacia-manager` (`6aed3a8735853522dc1e223e`), projeto `farmacia`. As imagens fornecidas mostram um cluster nesse projeto; não criar outro antes de inspecionar o existente e confirmar se está vazio e no plano gratuito. O banco de aplicação será exclusivo deste sistema.
+
+O Atlas recusou a consulta dessa organização porque AI client access/MCP está desativado. Aguardar o proprietário habilitar o acesso na organização nova, em Organization Settings → App Connections, antes de administrar seus recursos. Não contornar a restrição por outra conexão, credencial ou interface.
+
+Destino proibido: organização `Guilherme's Org - 2026-10-29` (`6ae326b4c5d2b7aaf8f72f11`), projeto `Project 0` (`6ae326b4c5d2b7aaf8f73045`), cluster `Cluster0` (`6ae3392a540ea22a3a9bb235`). Esse cluster tem bancos de outros sistemas. Nenhuma alteração foi feita nele, e ele não deve ser usado para a farmácia. Não solicitar senha no chat.
 
 ## Alcance confirmado no código
 
