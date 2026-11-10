@@ -62,4 +62,6 @@ O conector Atlas exigiu confirmação para liberar `74.220.49.0/24` e `74.220.57
 
 O Blueprint `render-atlas.yaml` prepara um serviço candidato gratuito, com a carga fictícia automática desligada. Configure `MONGODB_URI` como segredo do serviço. O provisionamento inicial precisa de uma credencial temporária com `readWrite` e `dbAdmin` no banco exclusivo. Depois de validar o serviço e suspender as gravações na origem, habilite `APP_IMPORTAR_POSTGRES=true`. Confira o marcador de importação e a reconciliação antes do corte.
 
+O Render planejou o Blueprint `exs-dbp7hr8m7kps73a31k30` no workspace dedicado. O plano cria somente o serviço gratuito `farmacia-manager-atlas` e aguarda o segredo `MONGODB_URI`. Ainda não foi aplicado. O modo de manutenção do Render exige um plano pago. Durante a transferência, use uma suspensão reversível do serviço PostgreSQL, após verificar a saúde do candidato, e preserve o banco de origem para eventual recuperação.
+
 Após a transferência, desligue a importação, defina `APP_MONGO_PROVISIONAR=false`, use uma credencial dedicada com `farmacia-manager-runtime` e retire os segredos temporários. Valide a troca em HTTPS e publique o endereço verificado. Preserve a origem PostgreSQL para recuperação.
