@@ -51,10 +51,17 @@ public class AuditoriaFilter extends OncePerRequestFilter {
                 }
             });
         } catch (RuntimeException ex) {
+            boolean conflito = com.farmacia.farmacia.exception.ConflitosMongo.concorrente(ex);
             try {
-                service.registrar(TipoAuditoria.ALTERACAO, usuario, acao, metodo, caminho, 500, req.getRemoteAddr());
+                service.registrar(TipoAuditoria.ALTERACAO, usuario, acao, metodo, caminho, conflito ? 409 : 500, req.getRemoteAddr());
             } catch (RuntimeException falhaAuditoria) {
                 ex.addSuppressed(falhaAuditoria);
+            }
+            if (conflito) {
+                res.setStatus(409);
+                res.setContentType("application/json;charset=UTF-8");
+                res.getWriter().write("{\"mensagem\":\"Outra operação alterou estes dados. Atualize a página e confira o resultado antes de tentar novamente.\"}");
+                return;
             }
             if (ex instanceof FalhaNaRequisicao && ex.getCause() instanceof ServletException servlet) throw servlet;
             if (ex instanceof FalhaNaRequisicao && ex.getCause() instanceof IOException io) throw io;

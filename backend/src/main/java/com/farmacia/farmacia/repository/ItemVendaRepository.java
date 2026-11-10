@@ -1,38 +1,36 @@
 package com.farmacia.farmacia.repository;
-
-import java.time.Instant;
-import java.util.List;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import com.farmacia.farmacia.model.ItemVenda;
-import com.farmacia.farmacia.model.StatusVenda;
-
-public interface ItemVendaRepository extends JpaRepository<ItemVenda, Long> {
-
-    @Query("select i.medicamento.id, i.medicamento.nome, "
-            + "sum(i.quantidade), sum(i.quantidade * i.precoUnitario) "
-            + "from ItemVenda i "
-            + "where i.venda.status = :status "
-            + "and i.venda.criadaEm >= :inicio and i.venda.criadaEm < :fim "
-            + "group by i.medicamento.id, i.medicamento.nome "
-            + "order by sum(i.quantidade) desc, i.medicamento.nome")
-    List<Object[]> maisVendidos(@Param("status") StatusVenda status,
-                                @Param("inicio") Instant inicio,
-                                @Param("fim") Instant fim,
-                                Pageable limite);
-
-    @Query("select i.medicamento.categoria.nome, "
-            + "sum(i.quantidade), sum(i.quantidade * i.precoUnitario) "
-            + "from ItemVenda i "
-            + "where i.venda.status = :status "
-            + "and i.venda.criadaEm >= :inicio and i.venda.criadaEm < :fim "
-            + "group by i.medicamento.categoria.nome "
-            + "order by sum(i.quantidade * i.precoUnitario) desc")
-    List<Object[]> totaisPorCategoria(@Param("status") StatusVenda status,
-                                      @Param("inicio") Instant inicio,
-                                      @Param("fim") Instant fim);
+import com.farmacia.farmacia.model.*;
+import java.util.*;
+import java.time.*;
+import java.math.BigDecimal;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.*;
+@Repository
+public class ItemVendaRepository {
+    private final MongoTemplate mongo;
+    public ItemVendaRepository(MongoTemplate mongo) { this.mongo = mongo; }
+    private List<ItemVenda> itens(StatusVenda status, Instant inicio, Instant fim) {
+        return mongo.find(Query.query(Criteria.where("status").is(status).and("criadaEm").gte(inicio).lt(fim)), Venda.class).stream().flatMap(v -> v.getItens().stream()).toList();
+    }
+    public List<Object[]> maisVendidos(StatusVenda status, Instant inicio, Instant fim, Pageable limite) {
+        Map<Long, Object[]> totais = new HashMap<>();
+        for (var item : itens(status, inicio, fim)) {
+            var medicamento = item.getMedicamento();
+            var row = totais.computeIfAbsent(medicamento.getId(), id -> new Object[]{id, medicamento.getNome(), 0L, BigDecimal.ZERO});
+            row[2] = (Long) row[2] + item.getQuantidade(); row[3] = ((BigDecimal) row[3]).add(item.getSubtotal());
+        }
+        var stream = totais.values().stream().sorted(Comparator.<Object[], Long>comparing(r -> (Long) r[2]).reversed().thenComparing(r -> (String) r[1]));
+        return limite.isPaged() ? stream.skip(limite.getOffset()).limit(limite.getPageSize()).toList() : stream.toList();
+    }
+    public List<Object[]> totaisPorCategoria(StatusVenda status, Instant inicio, Instant fim) {
+        Map<String, Object[]> totais = new HashMap<>();
+        for (var item : itens(status, inicio, fim)) {
+            String categoria = item.getMedicamento().getCategoria().getNome();
+            var row = totais.computeIfAbsent(categoria, nome -> new Object[]{nome, 0L, BigDecimal.ZERO});
+            row[1] = (Long) row[1] + item.getQuantidade(); row[2] = ((BigDecimal) row[2]).add(item.getSubtotal());
+        }
+        return totais.values().stream().sorted(Comparator.<Object[], BigDecimal>comparing(r -> (BigDecimal) r[2]).reversed()).toList();
+    }
 }

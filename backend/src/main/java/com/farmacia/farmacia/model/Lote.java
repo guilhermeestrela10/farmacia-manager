@@ -1,44 +1,32 @@
 package com.farmacia.farmacia.model;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 
 import java.time.Instant;
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "lote")
+@Document("lote")
 public class Lote {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Version private Long version;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "medicamento_id", nullable = false)
-    private Medicamento medicamento;
+    @DBRef private Medicamento medicamento;
 
-    @Column(name = "numero_lote", nullable = false, length = 50)
     private String numeroLote;
 
-    @Column(nullable = false)
     private LocalDate validade;
 
-    @Column(name = "quantidade_atual", nullable = false)
     private int quantidadeAtual;
 
-    @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm;
 
     protected Lote() {
-        // exigido pelo JPA
+        // exigido pelo mapeamento
     }
 
     public Lote(Medicamento medicamento, String numeroLote, LocalDate validade) {

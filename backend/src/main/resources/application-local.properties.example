@@ -1,6 +1,5 @@
-spring.datasource.url=jdbc:postgresql://localhost:5432/farmacia_db
-spring.datasource.username=postgres
-spring.datasource.password=troque_aqui
+spring.mongodb.uri=mongodb://127.0.0.1:27017/farmacia-manager?replicaSet=farmacia-local
+spring.mongodb.database=farmacia-manager
 
 app.admin.nome=Administrador
 app.admin.login=admin

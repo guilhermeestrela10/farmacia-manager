@@ -21,6 +21,7 @@ public class ClienteService {
     @Transactional public ClienteResponse definirAtivo(Long id,boolean ativo) {
         var cliente=repository.buscarPorIdComTravamento(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Cliente não encontrado."));
         cliente.definirAtivo(ativo);
+        repository.save(cliente);
         return toResponse(cliente);
     }
     @Transactional public Cliente buscarAtivo(Long id) {

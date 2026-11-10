@@ -1,17 +1,22 @@
 package com.farmacia.farmacia.model;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 import java.time.LocalDate;
 import java.util.*;
-@Entity @Table(name="receita")
+@Document("receita")
 public class Receita {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
-    @ManyToOne(fetch=FetchType.LAZY,optional=false) @JoinColumn(name="cliente_id",nullable=false) private Cliente cliente;
-    @Column(nullable=false,length=100) private String prescritor;
-    @Column(nullable=false,length=80) private String numero;
-    @Column(name="emitida_em",nullable=false) private LocalDate emitidaEm;
-    @Column(name="validade_ate",nullable=false) private LocalDate validadeAte;
-    @Column(length=2000) private String observacoes;
-    @OneToMany(mappedBy="receita",cascade=CascadeType.ALL) private List<ItemReceita> itens=new ArrayList<>();
+    @Id private Long id;
+    @Version private Long version;
+    @DBRef private Cliente cliente;
+    private String prescritor;
+    private String numero;
+    private LocalDate emitidaEm;
+    private LocalDate validadeAte;
+    private String observacoes;
+    private List<ItemReceita> itens=new ArrayList<>();
     protected Receita() {}
     public Receita(Cliente cliente,String prescritor,String numero,LocalDate emitidaEm,LocalDate validadeAte,String observacoes) {
         this.cliente=cliente; this.prescritor=prescritor.trim(); this.numero=numero.trim(); this.emitidaEm=emitidaEm; this.validadeAte=validadeAte; this.observacoes=observacoes;

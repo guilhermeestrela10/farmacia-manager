@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: farmacia-manager-atlas
+    runtime: docker
+    repo: https://github.com/guilhermeestrela10/farmacia-manager
+    branch: codex/mongodb-atlas-app
+    region: virginia
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod,demo
+      - key: APP_DEMO_SEED
+        value: "false"
+      - key: MONGODB_URI
+        sync: false
+      - key: MIGRATION_PG_HOST
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: host
+      - key: MIGRATION_PG_PORT
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: port
+      - key: MIGRATION_PG_DATABASE
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: database
+      - key: MIGRATION_PG_USER
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: user
+      - key: MIGRATION_PG_PASSWORD
+        fromDatabase:
+          name: farmacia-manager-demo-db
+          property: password

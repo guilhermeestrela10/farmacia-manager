@@ -15,14 +15,12 @@ import com.farmacia.farmacia.repository.ItemVendaRepository;
 import com.farmacia.farmacia.repository.LoteRepository;
 import com.farmacia.farmacia.repository.MovimentacaoEstoqueRepository;
 import com.farmacia.farmacia.repository.VendaRepository;
-import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -31,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -70,7 +68,7 @@ public class RelatorioService {
 
     /* ---------- Vendas ---------- */
 
-    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(readOnly = true)
     public RelatorioVendasResponse vendas(LocalDate de, LocalDate ate) {
         Periodo periodo = periodo(de, ate);
         ZoneId zona = ZoneId.systemDefault();
@@ -173,7 +171,7 @@ public class RelatorioService {
 
     /* ---------- Posição do estoque ---------- */
 
-    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(readOnly = true)
     public RelatorioEstoqueResponse estoque(LocalDate de, LocalDate ate) {
         LocalDate hoje = LocalDate.now();
         Periodo periodo = periodo(de, ate);
@@ -222,15 +220,8 @@ public class RelatorioService {
     }
 
     private List<Venda> buscarVendas(Periodo periodo, StatusVenda status) {
-        Specification<Venda> filtro = (root, query, cb) -> {
-            List<Predicate> condicoes = new ArrayList<>();
-            condicoes.add(cb.greaterThanOrEqualTo(
-                    root.<Instant>get("criadaEm"), periodo.comeco()));
-            condicoes.add(cb.lessThan(root.<Instant>get("criadaEm"), periodo.termino()));
-            condicoes.add(cb.equal(root.get("status"), status));
-            return cb.and(condicoes.toArray(new Predicate[0]));
-        };
-
+        Query filtro = Query.query(Criteria.where("criadaEm")
+                .gte(periodo.comeco()).lt(periodo.termino()).and("status").is(status));
         return vendaRepository.findAll(filtro);
     }
 

@@ -16,6 +16,17 @@ import org.springframework.dao.DataIntegrityViolationException;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+    @ExceptionHandler({org.springframework.dao.OptimisticLockingFailureException.class,
+            org.springframework.data.mongodb.MongoTransactionException.class,
+            org.springframework.data.mongodb.UncategorizedMongoDbException.class,
+            com.mongodb.MongoException.class})
+    public ResponseEntity<Map<String,String>> tratarConcorrencia(RuntimeException ex) {
+        if (ConflitosMongo.concorrente(ex)) return ResponseEntity.status(409).body(Map.of("mensagem",
+                "Outra operação alterou estes dados. Atualize a página e confira o resultado antes de tentar novamente."));
+        return ResponseEntity.status(503).body(Map.of("mensagem",
+                "Não foi possível confirmar a operação. Confira o histórico antes de tentar novamente."));
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> tratarConflitoDeDados(DataIntegrityViolationException ex) {
         return ResponseEntity.status(409).body(Map.of("mensagem",

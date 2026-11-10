@@ -96,6 +96,7 @@ public class MedicamentoService {
                             + " → " + request.preco().toPlainString(),
                     "/medicamentos/" + id, ip);
         }
+        medicamentoRepository.save(medicamento);
         return toResponse(medicamento);
     }
 
@@ -103,6 +104,7 @@ public class MedicamentoService {
     public MedicamentoResponse desativar(Long id) {
         Medicamento medicamento = buscarEntidadeComTravamento(id);
         medicamento.desativar();
+        medicamentoRepository.save(medicamento);
         return toResponse(medicamento);
     }
 
@@ -110,6 +112,7 @@ public class MedicamentoService {
     public MedicamentoResponse ativar(Long id) {
         Medicamento medicamento = buscarEntidadeComTravamento(id);
         medicamento.ativar();
+        medicamentoRepository.save(medicamento);
         return toResponse(medicamento);
     }
 

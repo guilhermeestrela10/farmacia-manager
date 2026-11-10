@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@EnabledIfSystemProperty(named = "farmacia.test.url", matches = "jdbc:postgresql://127\\.0\\.0\\.1:55432/postgres")
+@EnabledIfSystemProperty(named = "farmacia.test.mongo-uri", matches = "mongodb://127\\.0\\.0\\.1:55433/\\?replicaSet=farmacia-teste")
 class AuditoriaTransacionalIntegracaoTest {
     @Autowired CategoriaService categorias;
     @Autowired CategoriaRepository repository;

@@ -4,14 +4,13 @@ import com.farmacia.farmacia.dto.AuditoriaResponse;
 import com.farmacia.farmacia.model.RegistroAuditoria;
 import com.farmacia.farmacia.model.TipoAuditoria;
 import com.farmacia.farmacia.repository.AuditoriaRepository;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Locale;
-import org.springframework.data.domain.PageRequest;
+import java.util.regex.Pattern;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,16 +47,20 @@ public class AuditoriaService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Período ou limite inválido (1 a 1000).");
         }
         ZoneId zona = ZoneId.systemDefault();
-        Specification<RegistroAuditoria> filtro = (root, query, cb) -> {
-            var condicoes = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
-            if (de != null) condicoes.add(cb.greaterThanOrEqualTo(root.<Instant>get("dataHora"), de.atStartOfDay(zona).toInstant()));
-            if (ate != null) condicoes.add(cb.lessThan(root.<Instant>get("dataHora"), ate.plusDays(1).atStartOfDay(zona).toInstant()));
-            if (usuario != null && !usuario.isBlank()) condicoes.add(cb.equal(cb.lower(root.get("usuario")), usuario.trim().toLowerCase(Locale.ROOT)));
-            if (tipo != null) condicoes.add(cb.equal(root.get("tipo"), tipo));
-            if (somenteRecusadas) condicoes.add(cb.greaterThanOrEqualTo(root.get("status"), 400));
-            return cb.and(condicoes.toArray(jakarta.persistence.criteria.Predicate[]::new));
-        };
-        return repository.findAll(filtro, PageRequest.of(0, limite, Sort.by(Sort.Direction.DESC, "dataHora", "id")))
+        Query filtro = new Query();
+        if (de != null || ate != null) {
+            Criteria periodo = Criteria.where("dataHora");
+            if (de != null) periodo.gte(de.atStartOfDay(zona).toInstant());
+            if (ate != null) periodo.lt(ate.plusDays(1).atStartOfDay(zona).toInstant());
+            filtro.addCriteria(periodo);
+        }
+        if (usuario != null && !usuario.isBlank()) {
+            filtro.addCriteria(Criteria.where("usuario").regex(Pattern.compile(
+                    "^" + Pattern.quote(usuario.trim()) + "$", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)));
+        }
+        if (tipo != null) filtro.addCriteria(Criteria.where("tipo").is(tipo));
+        if (somenteRecusadas) filtro.addCriteria(Criteria.where("status").gte(400));
+        return repository.findAll(filtro.with(Sort.by(Sort.Direction.DESC, "dataHora", "id")).limit(limite))
                 .stream().map(r -> new AuditoriaResponse(r.getId(), r.getDataHora(), r.getTipo(),
                         r.getUsuario(), r.getAcao(), r.getMetodo(), r.getCaminho(), r.getStatus(), r.getIp())).toList();
     }

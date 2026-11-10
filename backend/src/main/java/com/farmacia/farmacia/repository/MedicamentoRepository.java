@@ -1,38 +1,25 @@
 package com.farmacia.farmacia.repository;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.Lock;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import com.farmacia.farmacia.model.Medicamento;
-
-public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> {
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select m from Medicamento m where m.id = :id")
-    Optional<Medicamento> buscarPorIdComTravamento(@Param("id") Long id);
-
-    boolean existsByCodigoBarras(String codigoBarras);
-
-    boolean existsByCodigoBarrasAndIdNot(String codigoBarras, Long id);
-
-    @Query("select m from Medicamento m "
-            + "join fetch m.categoria join fetch m.fabricante "
-            + "order by m.nome")
-    List<Medicamento> listarTodosComRelacionamentos();
-
-    @Query("select m.id, m.nome, m.estoqueMinimo, "
-            + "coalesce(sum(case when l.validade >= :hoje "
-            + "then l.quantidadeAtual else 0 end), 0L) "
-            + "from Medicamento m left join Lote l on l.medicamento = m "
-            + "where m.ativo = true "
-            + "group by m.id, m.nome, m.estoqueMinimo "
-            + "order by m.nome")
-    List<Object[]> saldoDisponivelDosAtivos(@Param("hoje") LocalDate hoje);
+import com.farmacia.farmacia.model.*;
+import java.util.*;
+import java.time.*;
+import java.math.BigDecimal;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.*;
+@Repository
+public class MedicamentoRepository extends MongoRepositoryBase<Medicamento> {
+    public MedicamentoRepository(MongoTemplate mongo) { super(mongo, Medicamento.class); }
+    public Optional<Medicamento> buscarPorIdComTravamento(Long id) { return locked(by("id", id)); }
+    public boolean existsByCodigoBarras(String codigoBarras) { return mongo.exists(by("codigoBarras", codigoBarras), type); }
+    public boolean existsByCodigoBarrasAndIdNot(String codigoBarras, Long id) { return mongo.exists(by("codigoBarras", codigoBarras).addCriteria(Criteria.where("id").ne(id)), type); }
+    public List<Medicamento> listarTodosComRelacionamentos() { return findAll(Sort.by("nome")); }
+    public List<Object[]> saldoDisponivelDosAtivos(LocalDate hoje) {
+        var ativos = findAll(by("ativo", true).with(Sort.by("nome")));
+        var ids = ativos.stream().map(Medicamento::getId).toList();
+        var lotes = mongo.find(Query.query(Criteria.where("medicamento.$id").in(ids).and("validade").gte(hoje)), Lote.class);
+        Map<Long, Long> saldos = new HashMap<>();
+        lotes.forEach(l -> saldos.merge(l.getMedicamento().getId(), (long) l.getQuantidadeAtual(), Long::sum));
+        return ativos.stream().map(m -> new Object[]{m.getId(), m.getNome(), m.getEstoqueMinimo(), saldos.getOrDefault(m.getId(), 0L)}).toList();
+    }
 }

@@ -60,6 +60,8 @@ class VendaEstoqueTest {
         service.registrar(new VendaRequest(List.of(new ItemVendaRequest(1L, 1, null)), FormaPagamento.PIX), "vendedor");
         assertEquals(Integer.MAX_VALUE - 1, lote1.getQuantidadeAtual());
         assertEquals(Integer.MAX_VALUE, lote2.getQuantidadeAtual());
+        verify(lotes).save(lote1);
+        verify(lotes, never()).save(lote2);
     }
 
     @Test

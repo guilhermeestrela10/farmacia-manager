@@ -1,12 +1,15 @@
 package com.farmacia.farmacia.repository;
 import com.farmacia.farmacia.model.*;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.data.repository.query.Param;
 import java.util.*;
-import jakarta.persistence.LockModeType;
-public interface ClienteRepository extends JpaRepository<Cliente,Long> {
-    @Lock(LockModeType.PESSIMISTIC_WRITE) @Query("select c from Cliente c where c.id=:id")
-    Optional<Cliente> buscarPorIdComTravamento(@Param("id") Long id);
-    @Query("select c from Cliente c where lower(c.nome) like lower(concat('%', :busca, '%')) order by c.nome,c.id")
-    List<Cliente> buscar(@Param("busca") String busca);
+import java.time.*;
+import java.math.BigDecimal;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.*;
+@Repository
+public class ClienteRepository extends MongoRepositoryBase<Cliente> {
+    public ClienteRepository(MongoTemplate mongo) { super(mongo, Cliente.class); }
+    public Optional<Cliente> buscarPorIdComTravamento(Long id) { return locked(by("id", id)); }
+    public List<Cliente> buscar(String busca) { return findAll(by("nome", contains(busca)).with(Sort.by("nome", "id"))); }
 }

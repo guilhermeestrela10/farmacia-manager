@@ -25,7 +25,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@EnabledIfSystemProperty(named = "farmacia.test.url", matches = "jdbc:postgresql://127\\.0\\.0\\.1:55432/postgres")
+@EnabledIfSystemProperty(named = "farmacia.test.mongo-uri", matches = "mongodb://127\\.0\\.0\\.1:55433/\\?replicaSet=farmacia-teste")
 class RelatorioSnapshotIntegracaoTest {
     @Autowired CategoriaRepository categorias;
     @Autowired FabricanteRepository fabricantes;
@@ -53,7 +53,9 @@ class RelatorioSnapshotIntegracaoTest {
         var cancelou = new AtomicBoolean();
         var outraTransacao = new TransactionTemplate(transacoes);
         outraTransacao.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        var fabrica = new ProxyFactory(vendas);
+        VendaRepository repositorio = AopTestUtils.getTargetObject(vendas);
+        var fabrica = new ProxyFactory(repositorio);
+        fabrica.setProxyTargetClass(true);
         fabrica.addAdvice((MethodInterceptor) chamada -> {
             Object resultado = chamada.proceed();
             if (chamada.getMethod().getName().equals("findAll") && cancelou.compareAndSet(false, true)) {

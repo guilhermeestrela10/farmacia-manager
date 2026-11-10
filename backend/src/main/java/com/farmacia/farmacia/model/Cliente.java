@@ -1,12 +1,16 @@
 package com.farmacia.farmacia.model;
-import jakarta.persistence.*;
-@Entity @Table(name="cliente")
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document("cliente")
 public class Cliente {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
-    @Column(nullable=false,length=100) private String nome;
-    @Column(length=30) private String telefone;
-    @Column(length=150) private String email;
-    @Column(nullable=false) private boolean ativo=true;
+    @Id private Long id;
+    @Version private Long version;
+    private String nome;
+    private String telefone;
+    private String email;
+    private boolean ativo=true;
     protected Cliente() {}
     public Cliente(String nome,String telefone,String email) { this.nome=nome.trim(); this.telefone=telefone; this.email=email; }
     public void definirAtivo(boolean ativo) { this.ativo=ativo; }

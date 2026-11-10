@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@EnabledIfSystemProperty(named = "farmacia.test.url", matches = "jdbc:postgresql://127\\.0\\.0\\.1:55432/postgres")
+@EnabledIfSystemProperty(named = "farmacia.test.mongo-uri", matches = "mongodb://127\\.0\\.0\\.1:55433/\\?replicaSet=farmacia-teste")
 @Transactional
 class SaldoEstornoIntegracaoTest {
     @Autowired CategoriaRepository categorias;
@@ -78,7 +78,7 @@ class SaldoEstornoIntegracaoTest {
         assertEquals(List.of(lotePrimeiro.getId(), loteSegundo.getId()),
                 saidas.stream().map(m -> m.getLote().getId()).toList());
         vendas.cancelar(venda.id(), "Teste de ordem", usuario.getLogin(), true);
-        assertEquals(5, lotePrimeiro.getQuantidadeAtual());
-        assertEquals(5, loteSegundo.getQuantidadeAtual());
+        assertEquals(5, lotes.findById(lotePrimeiro.getId()).orElseThrow().getQuantidadeAtual());
+        assertEquals(5, lotes.findById(loteSegundo.getId()).orElseThrow().getQuantidadeAtual());
     }
 }

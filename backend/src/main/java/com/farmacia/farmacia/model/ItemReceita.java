@@ -1,11 +1,14 @@
 package com.farmacia.farmacia.model;
-import jakarta.persistence.*;
-@Entity @Table(name="item_receita")
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+
 public class ItemReceita {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
-    @ManyToOne(fetch=FetchType.LAZY,optional=false) @JoinColumn(name="receita_id",nullable=false) private Receita receita;
-    @ManyToOne(fetch=FetchType.LAZY,optional=false) @JoinColumn(name="medicamento_id",nullable=false) private Medicamento medicamento;
-    @Column(nullable=false) private int quantidade;
+    @Id private Long id;
+    @Transient private Receita receita;
+    @DBRef private Medicamento medicamento;
+    private int quantidade;
     protected ItemReceita() {}
     public ItemReceita(Receita receita,Medicamento medicamento,int quantidade) { this.receita=receita; this.medicamento=medicamento; this.quantidade=quantidade; }
     public Medicamento getMedicamento() { return medicamento; }

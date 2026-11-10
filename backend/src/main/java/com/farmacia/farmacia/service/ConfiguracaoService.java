@@ -14,7 +14,7 @@ public class ConfiguracaoService {
     public ConfiguracaoService(ConfiguracaoRepository repository) { this.repository=repository; }
     @Transactional(readOnly=true) public ConfiguracaoResponse buscar() { return toResponse(singleton()); }
     @Transactional public ConfiguracaoResponse atualizar(ConfiguracaoRequest r) {
-        var c=singleton(); c.atualizar(r.nomeFarmacia(),r.telefone(),r.email(),r.endereco()); return toResponse(c);
+        var c=singleton(); c.atualizar(r.nomeFarmacia(),r.telefone(),r.email(),r.endereco()); return toResponse(repository.save(c));
     }
     private Configuracao singleton() { return repository.findById(1L).orElseThrow(() -> new IllegalStateException("Configuração da farmácia ausente.")); }
     private ConfiguracaoResponse toResponse(Configuracao c) { return new ConfiguracaoResponse(c.getNomeFarmacia(),c.getTelefone(),c.getEmail(),c.getEndereco()); }

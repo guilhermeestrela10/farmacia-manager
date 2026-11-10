@@ -1,37 +1,23 @@
 package com.farmacia.farmacia.repository;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import com.farmacia.farmacia.model.Perfil;
-import com.farmacia.farmacia.model.Usuario;
-import jakarta.persistence.LockModeType;
-
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-
-    Optional<Usuario> findByLogin(String login);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select u from Usuario u where u.id = :id")
-    Optional<Usuario> buscarPorIdComTravamento(@Param("id") Long id);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select u from Usuario u where u.login = :login")
-    Optional<Usuario> buscarPorLoginComTravamento(@Param("login") String login);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select u from Usuario u where u.perfil = com.farmacia.farmacia.model.Perfil.ADMIN "
-            + "and u.ativo = true order by u.id")
-    List<Usuario> buscarAdministradoresAtivosComTravamento();
-
-    boolean existsByLogin(String login);
-
-    long countByPerfilAndAtivoTrue(Perfil perfil);
-
-    List<Usuario> findAllByOrderByNome();
+import com.farmacia.farmacia.model.*;
+import java.util.*;
+import java.time.*;
+import java.math.BigDecimal;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.*;
+@Repository
+public class UsuarioRepository extends MongoRepositoryBase<Usuario> {
+    public UsuarioRepository(MongoTemplate mongo) { super(mongo, Usuario.class); }
+    public Optional<Usuario> findByLogin(String login) { return Optional.ofNullable(mongo.findOne(by("login", login), type)); }
+    public Optional<Usuario> buscarPorIdComTravamento(Long id) { return locked(by("id", id)); }
+    public Optional<Usuario> buscarPorLoginComTravamento(String login) { return locked(by("login", login)); }
+    public List<Usuario> buscarAdministradoresAtivosComTravamento() {
+        adminGuard();
+        return lockedAll(by("perfil", Perfil.ADMIN).addCriteria(Criteria.where("ativo").is(true)).with(Sort.by("id")));
+    }
+    public boolean existsByLogin(String login) { return mongo.exists(by("login", login), type); }
+    public long countByPerfilAndAtivoTrue(Perfil perfil) { return count(by("perfil", perfil).addCriteria(Criteria.where("ativo").is(true))); }
+    public List<Usuario> findAllByOrderByNome() { return findAll(Sort.by("nome")); }
 }

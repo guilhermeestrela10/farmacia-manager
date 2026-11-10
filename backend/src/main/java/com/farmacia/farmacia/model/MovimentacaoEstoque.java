@@ -1,51 +1,35 @@
 package com.farmacia.farmacia.model;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+
 import java.time.Instant;
 
-@Entity
-@Table(name = "movimentacao_estoque")
+@Document("movimentacao_estoque")
 public class MovimentacaoEstoque {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Version private Long version;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lote_id", nullable = false)
-    private Lote lote;
+    @DBRef private Lote lote;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private TipoMovimentacao tipo;
 
-    @Column(nullable = false)
     private int quantidade;
 
-    @Column(length = 200)
     private String motivo;
 
-    @Column(nullable = false, length = 100)
     private String responsavel;
 
-    @Column(name = "data_hora", nullable = false, updatable = false)
     private Instant dataHora;
 
-    @Column(name = "venda_id")
     private Long vendaId;
 
     protected MovimentacaoEstoque() {
-        // exigido pelo JPA
+        // exigido pelo mapeamento
     }
 
     public MovimentacaoEstoque(Lote lote, TipoMovimentacao tipo, int quantidade,

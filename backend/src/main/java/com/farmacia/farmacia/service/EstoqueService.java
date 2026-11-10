@@ -1,14 +1,13 @@
 package com.farmacia.farmacia.service;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ import com.farmacia.farmacia.repository.LoteRepository;
 import com.farmacia.farmacia.repository.MedicamentoRepository;
 import com.farmacia.farmacia.repository.MovimentacaoEstoqueRepository;
 
-import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class EstoqueService {
@@ -78,6 +76,7 @@ public class EstoqueService {
         }
 
         lote.adicionar(request.quantidade());
+        loteRepository.save(lote);
 
         MovimentacaoEstoque movimentacao = new MovimentacaoEstoque(
                 lote,
@@ -118,6 +117,7 @@ public class EstoqueService {
 
             int retirada = Math.min(restante, lote.getQuantidadeAtual());
             lote.remover(retirada);
+            loteRepository.save(lote);
 
             MovimentacaoEstoque movimentacao = movimentacaoRepository.save(
                     new MovimentacaoEstoque(
@@ -153,6 +153,7 @@ public class EstoqueService {
             baixar(lote, quantidade);
         }
 
+        loteRepository.save(lote);
         MovimentacaoEstoque movimentacao = new MovimentacaoEstoque(
                 lote, tipo, quantidade, request.motivo().trim(), request.responsavel().trim());
 
@@ -165,6 +166,7 @@ public class EstoqueService {
         int quantidade = request.quantidade();
 
         baixar(lote, quantidade);
+        loteRepository.save(lote);
 
         MovimentacaoEstoque movimentacao = new MovimentacaoEstoque(
                 lote,
@@ -189,35 +191,26 @@ public class EstoqueService {
 
         ZoneId zona = ZoneId.systemDefault();
 
-        Specification<MovimentacaoEstoque> filtro = (root, query, cb) -> {
-            List<Predicate> condicoes = new ArrayList<>();
-
-            if (medicamentoId != null) {
-                condicoes.add(cb.equal(
-                        root.get("lote").get("medicamento").get("id"), medicamentoId));
-            }
-            if (tipo != null) {
-                condicoes.add(cb.equal(root.get("tipo"), tipo));
-            }
-            if (de != null) {
-                condicoes.add(cb.greaterThanOrEqualTo(
-                        root.<Instant>get("dataHora"), de.atStartOfDay(zona).toInstant()));
-            }
-            if (ate != null) {
-                condicoes.add(cb.lessThan(
-                        root.<Instant>get("dataHora"),
-                        ate.plusDays(1).atStartOfDay(zona).toInstant()));
-            }
-
-            return cb.and(condicoes.toArray(new Predicate[0]));
-        };
-
+        Query filtro = new Query();
+        if (medicamentoId != null) {
+            List<Long> lotes = loteRepository.findAll(Query.query(
+                    Criteria.where("medicamento.$id").is(medicamentoId)))
+                    .stream().map(Lote::getId).toList();
+            filtro.addCriteria(Criteria.where("lote.$id").in(lotes));
+        }
+        if (tipo != null) {
+            filtro.addCriteria(Criteria.where("tipo").is(tipo));
+        }
+        if (de != null || ate != null) {
+            Criteria periodo = Criteria.where("dataHora");
+            if (de != null) periodo.gte(de.atStartOfDay(zona).toInstant());
+            if (ate != null) periodo.lt(ate.plusDays(1).atStartOfDay(zona).toInstant());
+            filtro.addCriteria(periodo);
+        }
         int tamanho = Math.min(Math.max(limite, 1), 500);
-        PageRequest pagina = PageRequest.of(
-                0, tamanho, Sort.by(Sort.Direction.DESC, "dataHora", "id"));
+        filtro.with(Sort.by(Sort.Direction.DESC, "dataHora", "id")).limit(tamanho);
 
-        return movimentacaoRepository.findAll(filtro, pagina)
-                .getContent()
+        return movimentacaoRepository.findAll(filtro)
                 .stream()
                 .map(this::toResponse)
                 .toList();

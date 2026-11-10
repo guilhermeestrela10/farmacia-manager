@@ -6,7 +6,6 @@ import com.farmacia.farmacia.repository.*;
 import com.farmacia.farmacia.service.*;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -16,13 +15,19 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Update;
+import java.util.Date;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Profile("demo")
+@ConditionalOnProperty(name="app.demo.seed", havingValue="true", matchIfMissing=true)
 @Order(0)
 public class DemoDados implements ApplicationRunner {
     private final UsuarioRepository usuarios;
@@ -40,19 +45,19 @@ public class DemoDados implements ApplicationRunner {
     private final ReceitaService receitas;
     private final DispensacaoService dispensacoes;
     private final ConfiguracaoService configuracao;
-    private final JdbcTemplate jdbc;
+    private final MongoTemplate mongo;
 
     public DemoDados(UsuarioRepository usuarios, PasswordEncoder encoder, CategoriaService categorias,
             FabricanteService fabricantes, MedicamentoService medicamentos, MedicamentoRepository catalogo,
             LoteRepository lotes, MovimentacaoEstoqueRepository movimentos, EstoqueService estoque,
             VendaService vendas, ClienteService clientes, AtendimentoService atendimentos,
             ReceitaService receitas, DispensacaoService dispensacoes, ConfiguracaoService configuracao,
-            JdbcTemplate jdbc) {
+            MongoTemplate mongo) {
         this.usuarios=usuarios; this.encoder=encoder; this.categorias=categorias;
         this.fabricantes=fabricantes; this.medicamentos=medicamentos; this.catalogo=catalogo;
         this.lotes=lotes; this.movimentos=movimentos; this.estoque=estoque; this.vendas=vendas;
         this.clientes=clientes; this.atendimentos=atendimentos; this.receitas=receitas;
-        this.dispensacoes=dispensacoes; this.configuracao=configuracao; this.jdbc=jdbc;
+        this.dispensacoes=dispensacoes; this.configuracao=configuracao; this.mongo=mongo;
     }
 
     @Override
@@ -92,9 +97,9 @@ public class DemoDados implements ApplicationRunner {
         for (int i=0; i<18; i++) {
             var venda=vendas.registrar(new VendaRequest(List.of(new ItemVendaRequest(ids.get(i%8),1+i%3,null)),
                     FormaPagamento.values()[i%4]),"demo.vendedor");
-            var data=Timestamp.from(hoje.minusDays(i%14).atTime(10+i%8,15).atZone(ZoneId.of("America/Sao_Paulo")).toInstant());
-            jdbc.update("UPDATE venda SET criada_em=? WHERE id=?",data,venda.id());
-            jdbc.update("UPDATE movimentacao_estoque SET data_hora=? WHERE venda_id=?",data,venda.id());
+            var data=Date.from(hoje.minusDays(i%14).atTime(10+i%8,15).atZone(ZoneId.of("America/Sao_Paulo")).toInstant());
+            mongo.updateFirst(Query.query(Criteria.where("_id").is(venda.id())),new Update().set("criadaEm",data),"venda");
+            mongo.updateMulti(Query.query(Criteria.where("vendaId").is(venda.id())),new Update().set("dataHora",data),"movimentacao_estoque");
         }
         Long ana=clientes.criar(new ClienteRequest("Cliente Fictícia Ana",null,null)).id();
         Long bruno=clientes.criar(new ClienteRequest("Cliente Fictício Bruno",null,null)).id();

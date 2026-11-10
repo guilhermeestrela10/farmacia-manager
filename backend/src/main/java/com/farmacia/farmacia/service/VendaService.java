@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -15,7 +14,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +45,6 @@ import com.farmacia.farmacia.repository.MovimentacaoEstoqueRepository;
 import com.farmacia.farmacia.repository.UsuarioRepository;
 import com.farmacia.farmacia.repository.VendaRepository;
 
-import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class VendaService {
@@ -168,6 +167,7 @@ public class VendaService {
 
                 int retirada = Math.min(restante, lote.getQuantidadeAtual());
                 lote.remover(retirada);
+                loteRepository.save(lote);
 
                 movimentacaoRepository.save(new MovimentacaoEstoque(
                         lote,
@@ -218,23 +218,15 @@ public class VendaService {
         Instant comeco = inicio.atStartOfDay(zona).toInstant();
         Instant termino = fim.plusDays(1).atStartOfDay(zona).toInstant();
 
-        Specification<Venda> filtro = (root, query, cb) -> {
-            List<Predicate> condicoes = new ArrayList<>();
-            condicoes.add(cb.greaterThanOrEqualTo(root.<Instant>get("criadaEm"), comeco));
-            condicoes.add(cb.lessThan(root.<Instant>get("criadaEm"), termino));
-
-            if (vendedorFiltro != null) {
-                condicoes.add(cb.equal(root.get("vendedor").get("id"), vendedorFiltro));
-            }
-            if (status != null) {
-                condicoes.add(cb.equal(root.get("status"), status));
-            }
-
-            return cb.and(condicoes.toArray(new Predicate[0]));
-        };
-
-        List<Venda> vendas = vendaRepository.findAll(filtro,
-                Sort.by(Sort.Direction.DESC, "criadaEm", "id"));
+        Query filtro = Query.query(Criteria.where("criadaEm").gte(comeco).lt(termino));
+        if (vendedorFiltro != null) {
+            filtro.addCriteria(Criteria.where("vendedor.$id").is(vendedorFiltro));
+        }
+        if (status != null) {
+            filtro.addCriteria(Criteria.where("status").is(status));
+        }
+        List<Venda> vendas = vendaRepository.findAll(filtro.with(
+                Sort.by(Sort.Direction.DESC, "criadaEm", "id")));
 
         BigDecimal totalVendido = BigDecimal.ZERO;
         long concluidas = 0;
@@ -313,6 +305,7 @@ public class VendaService {
                     .orElseThrow(() -> new IllegalStateException("Lote da venda não encontrado."));
 
             lote.adicionar(saida.getQuantidade());
+            loteRepository.save(lote);
 
             movimentacaoRepository.save(new MovimentacaoEstoque(
                     lote,
@@ -324,6 +317,7 @@ public class VendaService {
         }
 
         venda.cancelar(admin, motivoLimpo);
+        vendaRepository.save(venda);
         return toResponse(venda);
     }
 

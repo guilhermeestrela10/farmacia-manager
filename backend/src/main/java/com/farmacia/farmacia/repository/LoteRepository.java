@@ -1,64 +1,51 @@
 package com.farmacia.farmacia.repository;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import com.farmacia.farmacia.model.Lote;
-
-import jakarta.persistence.LockModeType;
-
-public interface LoteRepository extends JpaRepository<Lote, Long> {
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Lote> findByMedicamentoIdAndNumeroLote(Long medicamentoId, String numeroLote);
-
-    List<Lote> findByMedicamentoIdAndQuantidadeAtualGreaterThanOrderByValidade(
-            Long medicamentoId, int quantidade);
-
-    @Query("select coalesce(sum(l.quantidadeAtual), 0L), "
-            + "coalesce(sum(case when l.validade >= :hoje then l.quantidadeAtual else 0 end), 0L) "
-            + "from Lote l where l.medicamento.id = :medicamentoId")
-    List<Object[]> resumirSaldoPorMedicamento(@Param("medicamentoId") Long medicamentoId,
-                                            @Param("hoje") LocalDate hoje);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select l from Lote l "
-            + "where l.medicamento.id = :medicamentoId "
-            + "and l.quantidadeAtual > 0 "
-            + "and l.validade >= :hoje "
-            + "order by l.validade, l.id")
-    List<Lote> buscarDisponiveisParaSaida(@Param("medicamentoId") Long medicamentoId,
-                                          @Param("hoje") LocalDate hoje);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select l from Lote l where l.id = :id")
-    Optional<Lote> buscarPorIdComTravamento(@Param("id") Long id);
-
-    @Query("select l from Lote l join fetch l.medicamento "
-            + "where l.quantidadeAtual > 0 "
-            + "and l.validade >= :inicio and l.validade <= :fim "
-            + "order by l.validade, l.id")
-    List<Lote> buscarVencendoEntre(@Param("inicio") LocalDate inicio,
-                                   @Param("fim") LocalDate fim);
-
-    @Query("select l from Lote l join fetch l.medicamento "
-            + "where l.quantidadeAtual > 0 and l.validade < :hoje "
-            + "order by l.validade, l.id")
-    List<Lote> buscarVencidosComSaldo(@Param("hoje") LocalDate hoje);
-
-    @Query("select sum(l.quantidadeAtual), sum(l.quantidadeAtual * l.medicamento.preco) "
-            + "from Lote l "
-            + "where l.quantidadeAtual > 0 and l.validade >= :de and l.validade <= :ate")
-    List<Object[]> resumoPorValidade(@Param("de") LocalDate de, @Param("ate") LocalDate ate);
-    @Query("select l from Lote l join fetch l.medicamento m "
-            + "where l.quantidadeAtual > 0 "
-            + "and (lower(m.nome) like lower(concat('%', :busca, '%')) or lower(l.numeroLote) like lower(concat('%', :busca, '%'))) "
-            + "and l.validade >= :inicio and l.validade <= :fim order by l.validade,l.id")
-    List<Lote> buscarComSaldo(@Param("busca") String busca,@Param("inicio") LocalDate inicio,@Param("fim") LocalDate fim);
+import com.farmacia.farmacia.model.*;
+import java.util.*;
+import java.time.*;
+import java.math.BigDecimal;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.*;
+@Repository
+public class LoteRepository extends MongoRepositoryBase<Lote> {
+    public LoteRepository(MongoTemplate mongo) { super(mongo, Lote.class); }
+    public Optional<Lote> findByMedicamentoIdAndNumeroLote(Long medicamentoId, String numeroLote) {
+        return locked(by("medicamento.$id", medicamentoId).addCriteria(Criteria.where("numeroLote").is(numeroLote)));
+    }
+    public List<Lote> findByMedicamentoIdAndQuantidadeAtualGreaterThanOrderByValidade(Long medicamentoId, int quantidade) {
+        return findAll(by("medicamento.$id", medicamentoId).addCriteria(Criteria.where("quantidadeAtual").gt(quantidade)).with(Sort.by("validade", "id")));
+    }
+    public List<Object[]> resumirSaldoPorMedicamento(Long medicamentoId, LocalDate hoje) {
+        var lotes = findAll(by("medicamento.$id", medicamentoId));
+        long total = lotes.stream().mapToLong(Lote::getQuantidadeAtual).sum();
+        long disponivel = lotes.stream().filter(l -> !l.getValidade().isBefore(hoje)).mapToLong(Lote::getQuantidadeAtual).sum();
+        return Collections.singletonList(new Object[]{total, disponivel});
+    }
+    public List<Lote> buscarDisponiveisParaSaida(Long medicamentoId, LocalDate hoje) {
+        return lockedAll(by("medicamento.$id", medicamentoId).addCriteria(Criteria.where("quantidadeAtual").gt(0)).addCriteria(Criteria.where("validade").gte(hoje)).with(Sort.by("validade", "id")));
+    }
+    public Optional<Lote> buscarPorIdComTravamento(Long id) { return locked(by("id", id)); }
+    public List<Lote> buscarVencendoEntre(LocalDate inicio, LocalDate fim) {
+        return findAll(comSaldoEntre(inicio, fim).with(Sort.by("validade", "id")));
+    }
+    public List<Lote> buscarVencidosComSaldo(LocalDate hoje) {
+        return findAll(Query.query(Criteria.where("quantidadeAtual").gt(0)).addCriteria(Criteria.where("validade").lt(hoje)).with(Sort.by("validade", "id")));
+    }
+    public List<Object[]> resumoPorValidade(LocalDate de, LocalDate ate) {
+        var lotes = findAll(comSaldoEntre(de, ate));
+        if (lotes.isEmpty()) return Collections.singletonList(new Object[]{null, null});
+        long quantidade = lotes.stream().mapToLong(Lote::getQuantidadeAtual).sum();
+        BigDecimal valor = lotes.stream().map(l -> l.getMedicamento().getPreco().multiply(BigDecimal.valueOf(l.getQuantidadeAtual()))).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return Collections.singletonList(new Object[]{quantidade, valor});
+    }
+    public List<Lote> buscarComSaldo(String busca, LocalDate inicio, LocalDate fim) {
+        Query query = comSaldoEntre(inicio, fim);
+        var ids = mongo.find(by("nome", contains(busca)), Medicamento.class).stream().map(Medicamento::getId).toList();
+        query.addCriteria(new Criteria().orOperator(Criteria.where("numeroLote").regex(contains(busca)), Criteria.where("medicamento.$id").in(ids)));
+        return findAll(query.with(Sort.by("validade", "id")));
+    }
+    private static Query comSaldoEntre(LocalDate inicio, LocalDate fim) {
+        return Query.query(Criteria.where("quantidadeAtual").gt(0).and("validade").gte(inicio).lte(fim));
+    }
 }

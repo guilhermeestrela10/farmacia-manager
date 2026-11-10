@@ -1,29 +1,22 @@
 package com.farmacia.farmacia.model;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.*;
+
 import java.time.Instant;
 
-@Entity
-@Table(name = "auditoria")
+@Document("auditoria")
 public class RegistroAuditoria {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "data_hora", nullable = false, updatable = false)
+    @Id private Long id;
+    @Version private Long version;
     private Instant dataHora;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20, updatable = false)
     private TipoAuditoria tipo;
-    @Column(nullable = false, length = 50, updatable = false)
     private String usuario;
-    @Column(nullable = false, length = 500, updatable = false)
     private String acao;
-    @Column(nullable = false, length = 10, updatable = false)
     private String metodo;
-    @Column(nullable = false, length = 200, updatable = false)
     private String caminho;
-    @Column(nullable = false, updatable = false)
     private int status;
-    @Column(nullable = false, length = 45, updatable = false)
     private String ip;
 
     protected RegistroAuditoria() {}

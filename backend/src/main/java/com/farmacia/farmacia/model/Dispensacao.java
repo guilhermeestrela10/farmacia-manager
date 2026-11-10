@@ -1,12 +1,17 @@
 package com.farmacia.farmacia.model;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 import java.time.Instant;
-@Entity @Table(name="dispensacao")
+@Document("dispensacao")
 public class Dispensacao {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
-    @ManyToOne(fetch=FetchType.LAZY,optional=false) @JoinColumn(name="receita_id",nullable=false) private Receita receita;
-    @OneToOne(fetch=FetchType.LAZY,optional=false) @JoinColumn(name="venda_id",nullable=false,unique=true) private Venda venda;
-    @Column(name="criada_em",nullable=false,updatable=false) private Instant criadaEm;
+    @Id private Long id;
+    @Version private Long version;
+    @DBRef private Receita receita;
+    @DBRef private Venda venda;
+    private Instant criadaEm;
     protected Dispensacao() {}
     public Dispensacao(Receita receita,Venda venda) { this.receita=receita; this.venda=venda; this.criadaEm=Instant.now(); }
     public Long getId() { return id; }

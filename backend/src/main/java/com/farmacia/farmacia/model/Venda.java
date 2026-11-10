@@ -1,65 +1,45 @@
 package com.farmacia.farmacia.model;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Entity
-@Table(name = "venda")
+@Document("venda")
 public class Venda {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Version private Long version;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "vendedor_id", nullable = false)
-    private Usuario vendedor;
+    @DBRef private Usuario vendedor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "forma_pagamento", nullable = false, length = 15)
     private FormaPagamento formaPagamento;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal total;
+    @Field(targetType = FieldType.DECIMAL128) private BigDecimal total;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
     private StatusVenda status;
 
-    @Column(name = "criada_em", nullable = false, updatable = false)
     private Instant criadaEm;
 
-    @Column(name = "cancelada_em")
     private Instant canceladaEm;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cancelada_por_id")
-    private Usuario canceladaPor;
+    @DBRef private Usuario canceladaPor;
 
-    @Column(name = "motivo_cancelamento", length = 200)
     private String motivoCancelamento;
 
-    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL)
     private List<ItemVenda> itens = new ArrayList<>();
 
     protected Venda() {
-        // exigido pelo JPA
+        // exigido pelo mapeamento
     }
 
     public Venda(Usuario vendedor, FormaPagamento formaPagamento) {

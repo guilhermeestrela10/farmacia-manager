@@ -79,6 +79,7 @@ public class UsuarioService {
         }
 
         usuario.desativar();
+        repository.save(usuario);
         return toResponse(usuario);
     }
 
@@ -86,6 +87,7 @@ public class UsuarioService {
     public UsuarioResponse ativar(Long id) {
         Usuario usuario = buscar(id);
         usuario.ativar();
+        repository.save(usuario);
         return toResponse(usuario);
     }
 
@@ -103,6 +105,7 @@ public class UsuarioService {
                     "A nova senha deve ser diferente da atual.");
         }
         usuario.definirSenha(encoder.encode(novaSenha));
+        repository.save(usuario);
     }
 
     /**
@@ -138,6 +141,7 @@ public class UsuarioService {
         }
 
         usuario.definirSenha(encoder.encode(novaSenha));
+        repository.save(usuario);
         tentativas.limpar(login);
     }
 

@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@EnabledIfSystemProperty(named="farmacia.test.url",matches="jdbc:postgresql://127\\.0\\.0\\.1:55432/postgres")
+@EnabledIfSystemProperty(named="farmacia.test.mongo-uri",matches="mongodb://127\\.0\\.0\\.1:55433/\\?replicaSet=farmacia-teste")
 class DemoModulosIntegracaoTest {
     @Autowired CategoriaRepository categorias;
     @Autowired FabricanteRepository fabricantes;
@@ -65,7 +65,7 @@ class DemoModulosIntegracaoTest {
             Callable<Integer> acao=()->{
                 assertTrue(inicio.await(10,TimeUnit.SECONDS));
                 try { dispensacoes.registrar(pedido(c,1),c.login()); return 201; }
-                catch(ResponseStatusException ex) { return ex.getStatusCode().value(); }
+                catch(RuntimeException ex) { return ConflitoMongoTeste.status(ex); }
             };
             var primeira=executor.submit(acao); var segunda=executor.submit(acao);
             inicio.countDown();

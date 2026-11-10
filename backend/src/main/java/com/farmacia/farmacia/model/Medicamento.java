@@ -1,60 +1,42 @@
 package com.farmacia.farmacia.model;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "medicamento")
+@Document("medicamento")
 public class Medicamento {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Version private Long version;
 
-    @Column(nullable = false, length = 150)
     private String nome;
 
-    @Column(name = "codigo_barras", length = 20)
     private String codigoBarras;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+    @DBRef private Categoria categoria;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fabricante_id", nullable = false)
-    private Fabricante fabricante;
+    @DBRef private Fabricante fabricante;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
     private TipoMedicamento tipo;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal preco;
+    @Field(targetType = FieldType.DECIMAL128) private BigDecimal preco;
 
-    @Column(name = "estoque_minimo", nullable = false)
     private int estoqueMinimo;
 
-    @Column(nullable = false)
     private boolean ativo;
 
-    @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm;
 
     protected Medicamento() {
-        // exigido pelo JPA
+        // exigido pelo mapeamento
     }
 
     public Medicamento(String nome, String codigoBarras, Categoria categoria,

@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@EnabledIfSystemProperty(named = "farmacia.test.url", matches = "jdbc:postgresql://127\\.0\\.0\\.1:55432/postgres")
+@EnabledIfSystemProperty(named = "farmacia.test.mongo-uri", matches = "mongodb://127\\.0\\.0\\.1:55433/\\?replicaSet=farmacia-teste")
 class EstoqueVendaIntegracaoTest {
     @Autowired CategoriaRepository categorias;
     @Autowired FabricanteRepository fabricantes;
@@ -71,7 +71,7 @@ class EstoqueVendaIntegracaoTest {
             var tarefas = List.of(primeira, segunda).stream().map(acao -> executor.submit(() -> {
                 assertTrue(inicio.await(10, TimeUnit.SECONDS));
                 try { acao.get(); return 200; }
-                catch (ResponseStatusException ex) { return ex.getStatusCode().value(); }
+                catch (RuntimeException ex) { return ConflitoMongoTeste.status(ex); }
             })).toList();
             inicio.countDown();
             return List.of(tarefas.get(0).get(20, TimeUnit.SECONDS), tarefas.get(1).get(20, TimeUnit.SECONDS));
@@ -81,9 +81,13 @@ class EstoqueVendaIntegracaoTest {
     @Test
     void entradasConcorrentesNoMesmoLoteSomamSemDuplicar() throws Exception {
         var c = cenario();
-        assertEquals(List.of(200, 200), simultaneas(
+        var resultados = simultaneas(
                 () -> estoque.registrarEntrada(entrada(c, "MESMO", 5)),
-                () -> estoque.registrarEntrada(entrada(c, "MESMO", 7))));
+                () -> estoque.registrarEntrada(entrada(c, "MESMO", 7)));
+        assertTrue(resultados.stream().allMatch(status -> status == 200 || status == 409));
+        assertTrue(resultados.contains(200));
+        if (resultados.get(0) == 409) estoque.registrarEntrada(entrada(c, "MESMO", 5));
+        if (resultados.get(1) == 409) estoque.registrarEntrada(entrada(c, "MESMO", 7));
         var lista = estoque.listarLotes(c.medicamento().getId());
         assertEquals(1, lista.size());
         assertEquals(12, lista.getFirst().quantidadeAtual());
@@ -119,6 +123,23 @@ class EstoqueVendaIntegracaoTest {
     }
 
     @Test
+    void cancelamentosConcorrentesEstornamCadaSaidaSomenteUmaVez() throws Exception {
+        var c = cenario();
+        var lote = lote(c, "CANCELAMENTO", 10, 5);
+        var venda = vendaService.registrar(pedido(c.medicamento(), 2), c.usuario().getLogin());
+        var resultados = simultaneas(
+                () -> vendaService.cancelar(venda.id(), "Primeiro", c.usuario().getLogin(), true),
+                () -> vendaService.cancelar(venda.id(), "Segundo", c.usuario().getLogin(), true));
+        assertEquals(1, resultados.stream().filter(status -> status == 200).count());
+        assertEquals(1, resultados.stream().filter(status -> status == 409).count());
+        assertEquals(5, saldo(lote));
+        assertEquals(StatusVenda.CANCELADA, vendas.findById(venda.id()).orElseThrow().getStatus());
+        var estornos = movimentos.findByVendaIdAndTipo(venda.id(), TipoMovimentacao.ESTORNO);
+        assertEquals(1, estornos.size());
+        assertEquals(2, estornos.getFirst().getQuantidade());
+    }
+
+    @Test
     void vendaComItemSemEstoqueReverteVendaEOutrasBaixas() {
         var c = cenario();
         var outro = cenario();
@@ -134,10 +155,14 @@ class EstoqueVendaIntegracaoTest {
     @Test
     void redefinicaoConcorrenteNaoReativaUsuario() throws Exception {
         var c = cenario();
-        assertEquals(List.of(200, 200), simultaneas(() -> {
+        var resultados = simultaneas(() -> {
             usuarioService.redefinirSenha(c.usuario().getId(), "NovaFicticia123!");
             return true;
-        }, () -> usuarioService.desativar(c.usuario().getId(), "outro-admin")));
+        }, () -> usuarioService.desativar(c.usuario().getId(), "outro-admin"));
+        assertTrue(resultados.stream().allMatch(status -> status == 200 || status == 409));
+        assertTrue(resultados.contains(200));
+        if (resultados.get(0) == 409) usuarioService.redefinirSenha(c.usuario().getId(), "NovaFicticia123!");
+        if (resultados.get(1) == 409) usuarioService.desativar(c.usuario().getId(), "outro-admin");
         var usuario = usuarios.findById(c.usuario().getId()).orElseThrow();
         assertFalse(usuario.isAtivo());
         assertTrue(encoder.matches("NovaFicticia123!", usuario.getSenhaHash()));
