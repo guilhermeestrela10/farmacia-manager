@@ -74,3 +74,12 @@ O último ciclo completo passou com 41 testes Java e 6 testes JavaScript. Inclui
 O bloqueio de login ainda fica em memória e é limpo ao reiniciar. A busca do catálogo ainda filtra em Java. HTTPS, backups e configuração de produção continuam pendentes. Use dados fictícios na validação.
 
 Veja o [escopo atual](docs/escopo-mvp.md), o [diagnóstico da retomada](docs/retomada-seguranca-4b-4c.md) e o [registro das correções](docs/correcoes-revisao-projeto.md).
+
+## Estrutura do repositório
+
+- `backend/src/main/java/`: controladores, serviços, dados e segurança.
+- `backend/src/main/resources/`: configurações, migrações e interface web.
+- `backend/src/test/`: testes Java e JavaScript.
+- `docs/`: escopo, modelo inicial do banco e revisões.
+
+Os caminhos absolutos dos exemplos representam o ambiente original. Em outro computador, entre na pasta `backend/` da sua cópia e ajuste `JAVA_HOME`.
