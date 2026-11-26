@@ -1,0 +1,27 @@
+name: Relatar problema
+description: Descreva um comportamento reproduzível da aplicação.
+body:
+  - type: markdown
+    attributes:
+      value: Não inclua senhas, tokens, dados de clientes, pacientes ou pedidos reais. Falhas de segurança devem seguir SECURITY.md.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Comportamento observado e esperado
+      description: Explique o problema e o resultado que você esperava.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Como reproduzir
+      description: Informe os passos e use dados fictícios.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Informe versão ou commit, sistema, navegador e configurações relevantes, sem valores secretos.
+    validations:
+      required: true

@@ -1,5 +1,9 @@
 # Farmácia Manager
 
+[![Testes](https://github.com/guilhermeestrela10/farmacia-manager/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/guilhermeestrela10/farmacia-manager/actions/workflows/ci.yml)
+
+[Execução](#executar-no-windows) · [Regras](#regras-importantes) · [Escopo](docs/escopo-mvp.md) · [Contribuição](CONTRIBUTING.md)
+
 Sistema web de gerenciamento de farmácia com medicamentos, estoque por lote e validade, vendas, relatórios, usuários e auditoria. Backend Java 21 com Spring Boot 4.1.1, PostgreSQL 18 e frontend HTML/CSS/JavaScript servido pelo Spring.
 
 ## Funcionalidades disponíveis
@@ -16,12 +20,13 @@ Clientes, atendimento farmacêutico, receitas, dispensações, configurações e
 
 ## Executar no Windows
 
-Requisitos: JDK 21 ou superior, PostgreSQL 18 e PowerShell. O Maven Wrapper está incluído. Neste ambiente, a pasta do projeto é `C:\Users\guilh\projetos\farmacia-manager`.
+Requisitos: JDK 21 ou superior, PostgreSQL 18 e PowerShell. O Maven Wrapper está incluído.
 
-Crie o banco `farmacia_db` pelo pgAdmin. Prepare a configuração local somente se ela ainda não existir:
+Clone o projeto e entre em `backend/`. Execute os demais comandos desta seção nessa pasta. Crie o banco local `farmacia_db` pelo pgAdmin; prepare a configuração somente se ela ainda não existir:
 
 ```powershell
-cd 'C:\Users\guilh\projetos\farmacia-manager\backend'
+git clone https://github.com/guilhermeestrela10/farmacia-manager.git
+Set-Location farmacia-manager/backend
 if (-not (Test-Path 'src/main/resources/application-local.properties')) {
     Copy-Item 'src/main/resources/application-local.properties.example' 'src/main/resources/application-local.properties'
 }
@@ -29,11 +34,9 @@ if (-not (Test-Path 'src/main/resources/application-local.properties')) {
 
 Edite `backend/src/main/resources/application-local.properties` localmente: conexão do banco e dados do administrador inicial. Esse arquivo é ignorado pelo Git. Nunca publique senhas. O administrador inicial só é criado quando a tabela de usuários está vazia; a senha deve ter de 8 a 72 caracteres e até 72 bytes em UTF-8.
 
-Inicie a aplicação (ajuste JAVA_HOME se seu JDK estiver em outra pasta):
+Configure `JAVA_HOME` com o caminho do seu JDK 21+ e inicie a aplicação:
 
 ```powershell
-cd 'C:\Users\guilh\projetos\farmacia-manager\backend'
-$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.5'
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -46,7 +49,6 @@ Pare com Ctrl+C. Após editar Java ou arquivos estáticos, reinicie e atualize o
 O comando abaixo executa os testes JavaScript, cria um PostgreSQL descartável com configuração regional portuguesa na porta 55432 e roda toda a suíte Java. Depois encerra e remove esse banco. Precisa de Node.js e PostgreSQL 18 instalado em `C:\Program Files\PostgreSQL\18\bin`.
 
 ```powershell
-cd 'C:\Users\guilh\projetos\farmacia-manager\backend'
 .\testar.ps1
 ```
 
@@ -55,8 +57,6 @@ O script não reutiliza bancos existentes, não lê a configuração local e rec
 Para compilar sem iniciar a aplicação:
 
 ```powershell
-cd 'C:\Users\guilh\projetos\farmacia-manager\backend'
-$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.5'
 .\mvnw.cmd -q -DskipTests compile
 ```
 
@@ -72,6 +72,8 @@ O último ciclo completo passou com 41 testes Java e 6 testes JavaScript. Inclui
 - V9 garante unicidade de nomes de categorias e fabricantes sem distinguir maiúsculas, conforme a configuração regional do PostgreSQL. Duplicatas existentes devem ser resolvidas antes de aplicar essa versão; a migração não apaga nem mescla cadastros.
 
 O bloqueio de login ainda fica em memória e é limpo ao reiniciar. A busca do catálogo ainda filtra em Java. HTTPS, backups e configuração de produção continuam pendentes. Use dados fictícios na validação.
+
+O workflow no GitHub executa os testes JavaScript e Java com PostgreSQL 18 descartável. Ele não acessa o banco de desenvolvimento nem serviços de produção.
 
 Veja o [escopo atual](docs/escopo-mvp.md), o [diagnóstico da retomada](docs/retomada-seguranca-4b-4c.md) e o [registro das correções](docs/correcoes-revisao-projeto.md).
 
